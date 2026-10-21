@@ -41,8 +41,9 @@ export function buildPreviewPage({ kind = 'chat', stub = '', name = 'preview' } 
 }
 
 /** 常用桩：假 vscode API + 假 EventSource + 假 fetch。 */
-export function vscodeStub({ events = [], init = {}, onReady = '' } = {}) {
+export function vscodeStub({ events = [], init = {}, onReady = '', startDelayMs = 120 } = {}) {
   return `
+    window.__QZ_START_DELAY__ = ${Number(startDelayMs) || 0};
     window.__QZ_EVENTS__ = ${JSON.stringify(events)};
     window.__QZ_INIT__ = ${JSON.stringify(init)};
     window.__QZ_READY__ = function () { ${onReady} };
@@ -56,7 +57,7 @@ export function vscodeStub({ events = [], init = {}, onReady = '' } = {}) {
           if (this.onmessage) this.onmessage({ data: JSON.stringify(list[index++]) });
           window.__QZ_TIMER__ = setTimeout(tick, 90);
         };
-        window.__QZ_TIMER__ = setTimeout(tick, 120);
+        window.__QZ_TIMER__ = setTimeout(tick, window.__QZ_START_DELAY__ ?? 120);
       }
       close() { clearTimeout(window.__QZ_TIMER__); }
     }

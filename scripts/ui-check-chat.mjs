@@ -13,6 +13,7 @@ const PAGE = buildPreviewPage({
   kind: 'chat',
   name: 'chat',
   stub: vscodeStub({
+    startDelayMs: 1100,
     init: { providers: { providers: [], current: { provider: 'ghd', model: 'deepseek-v4.1-flash', mock: false } } },
     events: [
       { t: 'route', decision: { route: 'pipeline', why: '要改动代码' } },
@@ -53,6 +54,12 @@ const PAGE = buildPreviewPage({
         const dy = Math.abs((h.top + h.bottom) / 2 - (t.top + t.bottom) / 2);
         return { ok: dx <= 3 && dy <= 12, dx: Math.round(dx), dy: Math.round(dy), textAlign: getComputedStyle(hint).textAlign };
       })();
+      setTimeout(() => {
+        const thinking = document.getElementById('thinking');
+        window.__THINKING__ = thinking
+          ? { text: thinking.textContent.trim(), dots: thinking.querySelectorAll('.dots i').length }
+          : null;
+      }, 260);
       window.__EMPTY__ = {
         flow: (document.querySelector('.empty-flow') || {}).textContent || '',
         chain: (document.querySelector('.empty-chain') || {}).textContent || '',
@@ -170,6 +177,14 @@ check('空状态在画面正中（横竖都居中）', centerFit ? centerFit.ok 
 
 check('空状态写着 L 管全程', /L\s*管全程/.test(emptyState.flow), emptyState.flow.trim())
 check('执行链是 A→B→C 三段', emptyState.chainItems === 3 && /写任务书/.test(emptyState.chain) && /核验/.test(emptyState.chain), emptyState.chain.trim())
+
+const thinkingState = await evaluate(`(() => ({
+  saved: window.__THINKING__ || null,
+  now: Boolean(document.getElementById('thinking')),
+}))()`)
+check('刚发出消息时显示"正在思考中"', thinkingState.saved !== null && /正在思考中/.test(thinkingState.saved.text), JSON.stringify(thinkingState.saved))
+check('思考中带三个跳动的小点', (thinkingState.saved?.dots ?? 0) === 3, JSON.stringify({ dots: thinkingState.saved?.dots }))
+check('收到回复后角标自动消失', thinkingState.now === false, JSON.stringify({ now: thinkingState.now }))
 
 check('运行中有「已运行 XX」计时器', /已运行/.test(midRun.timer ?? ''), midRun.timer ?? 'null')
 check('接力轨道有 4 段且当前段点亮', midRun.railNodes === 4 && midRun.railActive >= 0, `nodes=${midRun.railNodes} active=${midRun.railActive}`)

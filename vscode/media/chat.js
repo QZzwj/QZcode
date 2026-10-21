@@ -193,6 +193,29 @@ function clockNode() {
   return el('span', 'timer', label)
 }
 
+/* ---------------------------------------------------------- 等待反馈
+   消息发出去到模型吐第一个字之间有一段空档（几百毫秒到几秒）。
+   这段时间给一条"正在思考中"，人就知道不是卡死了。 */
+
+function showThinking() {
+  hideThinking()
+  const row = el('div', 'msg agent thinking')
+  row.id = 'thinking'
+  const head = el('div', 'head')
+  head.append(el('span', 'badge', '·'), el('span', 'title', '正在思考中'))
+  const dots = el('span', 'dots')
+  dots.append(el('i'), el('i'), el('i'))
+  head.append(dots)
+  row.append(head)
+  thread.append(row)
+  scrollDown()
+}
+
+function hideThinking() {
+  const node = document.getElementById('thinking')
+  if (node) node.remove()
+}
+
 function addUser(text) {
   clearHint()
   const row = el('div', 'msg user')
@@ -291,6 +314,8 @@ function addTag(pane, text, cls) {
 /* -------------------------------------------------------------------- events */
 
 function handle(event) {
+  // 只要有真实进展，就不再是"还在想"了
+  if (event.t !== 'run_start') hideThinking()
   switch (event.t) {
     case 'run_start':
       setStatus('A 写任务书中…', 'live')
@@ -370,6 +395,7 @@ function handle(event) {
 
 
     case 'run_end':
+      hideThinking()
       setRail('verifier', true)
       setBusy(false)
       view.runId = null
@@ -428,6 +454,7 @@ async function send() {
   input.value = ''
   autoGrow()
   addUser(goal)
+  showThinking()
   view.bubbles.clear()
   view.round = 0
   setBusy(true)
@@ -450,6 +477,7 @@ async function send() {
     subscribe(payload.runId)
   } catch (error) {
     setBusy(false)
+    hideThinking()
     setStatus(`请求失败：${error.message}`, 'err')
     addRetryHint()
   }
@@ -537,6 +565,7 @@ function addRetryHint() {
 
 function newTask() {
   closeSource()
+  hideThinking()
   view.bubbles.clear()
   view.round = 0
   setBusy(false)
