@@ -832,7 +832,7 @@ async function showRunDiff() {
     }
     const last = state.runs[0]
     if (!last) {
-      setStatus('$(circle-outline) QZcode', '点击打开工作台')
+      setStatus('$(circle-outline) QZcode', '点击打开侧栏聊天')
       return
     }
     const icon = last.status === 'passed' ? '$(pass-filled)' : last.status === 'failed' ? '$(error)' : '$(circle-outline)'
@@ -891,7 +891,7 @@ function stopServer() {
     runtime.child = null
   }
   runtime.url = null
-  setStatus('$(circle-outline) QZcode', '点击打开工作台')
+  setStatus('$(circle-outline) QZcode', '点击打开侧栏聊天')
 }
 
 /** 打开（或生成）qzcode.json：插件的唯一开关就在这里。 */
@@ -983,7 +983,7 @@ function activate(context) {
   runtime.extensionPath = context.extensionPath
   runtime.version = context.extension.packageJSON.version
   runtime.globalDir = context.globalStorageUri ? context.globalStorageUri.fsPath : ''
-  setStatus('$(circle-outline) QZcode', '点击打开工作台')
+  setStatus('$(circle-outline) QZcode', '点击打开侧栏聊天')
 
   const chat = new ChatView(context)
   runtime.chat = chat

@@ -40,7 +40,7 @@ interface Args {
 }
 
 const HELP = `
-QZcode — 三模型编码流水线（A 出提示词与指导 · B 实现 · C 核验）
+QZcode — 四角色接力编码流水线（L 管全程 · A 出任务书 · B 实现 · C 核验）
 
 用法:
   qzcode                        启动 TUI
