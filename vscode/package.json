@@ -2,7 +2,7 @@
   "name": "qzcode",
   "displayName": "QZcode",
   "description": "四角色接力把一句话目标做成改动：L 管全程 → A 写任务书 → B 带工具实现 → C 只读核验，不通过就退回 A 重写任务书，最多 3 轮。自带后端，装好即用。",
-  "version": "3.5.8",
+  "version": "3.6.0",
   "publisher": "qzcode",
   "license": "MIT",
   "author": "QZzwj",
@@ -225,8 +225,8 @@
         },
         "qzcode.nodePath": {
           "type": "string",
-          "default": "node",
-          "description": "用来跑 QZcode 的 node 可执行文件（需要 Node ≥ 22.19）。"
+          "default": "",
+          "description": "用哪个 Node 跑本地服务。留空（默认）就用 VS Code 自带的运行时，机器上不需要装 Node；只有想指到别的 node 时才填绝对路径。"
         },
         "qzcode.configFile": {
           "type": "string",

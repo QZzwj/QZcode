@@ -15,7 +15,7 @@ L 管全程 → A 写任务书 → B 实现 → C 核验 → （不通过退回 
 ## 目录
 
 ```
-src/                 后端（Node 直接跑 .ts，无需编译）
+src/                 后端（Node 直接跑 .ts，无需编译；扩展里跑的是打包好的 dist/cli.js）
   kernel.ts          插件/工具/命令的装配
   agent.ts           单个角色的工具循环
   llm.ts             OpenAI 兼容 SSE 客户端（含截断重试、心跳）

@@ -29,7 +29,7 @@ code --install-extension qzcode.vsix --force
 # 卸载：code --uninstall-extension qzcode.qzcode
 ```
 
-**前置条件：机器上要有 Node。** 扩展会用它来跑自带的本地服务；`qzcode.nodePath` 可以指定别的 node。
+**不需要装 Node。** 扩展直接用 VS Code 自带的运行时跑本地服务，装好就能用；想指到别的 node 时在设置里填 `qzcode.nodePath` 即可。
 
 ---
 
@@ -121,7 +121,7 @@ code --install-extension qzcode.vsix --force
 | `qzcode.exec` | `true` | 允许 B/C 执行 shell 命令 |
 | `qzcode.rounds` | `0` | 最大轮次（默认 3 轮：C 不通过 → A 重写 → 重做，最多来回 3 次）。0 = 用配置文件里的值 |
 | `qzcode.configFile` | 空 | `qzcode.json` 路径，留空用工作区里的 |
-| `qzcode.nodePath` | `node` | 跑本地服务的 node |
+| `qzcode.nodePath` | 空 | 留空 = 用 VS Code 自带的运行时（不需要装 Node）；想用别的 node 才填 |
 | `qzcode.autoStart` | `false` | 打开编辑器就把服务拉起来 |
 | `qzcode.log` | `false` | 诊断日志写进 `.qzcode/debug.log` |
 | `qzcode.cliPath` | 空 | 一般不用填（只有想用别的后端时才填） |
@@ -173,4 +173,4 @@ code --install-extension qzcode.vsix --force
 
 - 设置面板保存时会把配置写进 `qzcode.json`；插件、模型、key 都在那个文件里。
 - 本地服务是扩展的子进程：「停止服务」或关掉编辑器会杀掉它；端口随机，不占固定端口。
-- 需要机器上装 Node；装好后不需要任何额外安装或配置就能用。
+- 不需要装 Node：本地服务跑在 VS Code 自带的运行时上，装好后不需要任何额外安装或配置。

@@ -126,10 +126,10 @@ export async function runDoctor(options: DoctorOptions): Promise<DoctorResult> {
   const major = Number(process.version.replace(/^v/, '').split('.')[0])
   checks.push({
     id: 'runtime.node',
-    name: 'Node 版本',
+    name: '运行时',
     level: major >= 18 ? 'ok' : 'error',
-    detail: `${process.version}（${process.platform} ${process.arch}）`,
-    fix: major >= 18 ? undefined : '升级到 Node 18+（仓库里直接跑 .ts 需要 22.19+）',
+    detail: `${process.version}（${process.platform} ${process.arch}）${process.env.ELECTRON_RUN_AS_NODE ? ' · 来自 VS Code 自带运行时' : ''}`,
+    fix: major >= 18 ? undefined : '这个运行时太旧；扩展默认用 VS Code 自带运行时，一般不会走到这里',
   })
 
   // 2) 配置

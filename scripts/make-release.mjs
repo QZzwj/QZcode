@@ -7,7 +7,8 @@ import { readFileSync } from 'node:fs'
  */
 
 const REPO = 'QZzwj/QZcode'
-const TAG = 'v3.5.8'
+const VERSION = process.env.QZ_VERSION ?? JSON.parse(readFileSync(new URL('../vscode/package.json', import.meta.url), 'utf8')).version
+const TAG = `v${VERSION}`
 
 function gitCredential() {
   // 让 git 自己吐出它给 origin 用的凭据（凭据管理器里已有的那套）
@@ -49,13 +50,13 @@ if (existing.status === 200) {
 } else {
   console.log('还没有 release，开始创建（HTTP ' + existing.status + '）')
 
-  const notes = readFileSync('release-notes-3.5.8.md', 'utf8')
+  const notes = readFileSync(`release-notes-${VERSION}.md`, 'utf8')
   const created = await fetch(`https://api.github.com/repos/${REPO}/releases`, {
     method: 'POST',
     headers: { ...headers, 'content-type': 'application/json' },
     body: JSON.stringify({
       tag_name: TAG,
-      name: 'QZcode 3.5.8',
+      name: `QZcode ${VERSION}`,
       body: notes,
       draft: false,
       prerelease: false,
@@ -69,8 +70,8 @@ if (existing.status === 200) {
   console.log('创建成功:', payload.html_url)
 
   // 2) 把 vsix 作为附件传上去
-  const asset = readFileSync('qzcode-3.5.8.vsix')
-  const uploadUrl = payload.upload_url.replace(/\{.*\}$/, '') + '?name=qzcode-3.5.8.vsix'
+  const asset = readFileSync(`qzcode-${VERSION}.vsix`)
+  const uploadUrl = payload.upload_url.replace(/\{.*\}$/, '') + '?name=qzcode-${VERSION}.vsix'
   const uploaded = await fetch(uploadUrl, {
     method: 'POST',
     headers: {

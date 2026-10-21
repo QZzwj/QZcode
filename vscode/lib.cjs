@@ -58,6 +58,34 @@ function peerVersionDirs(extensionPath) {
     .map((name) => path.join(root, name))
 }
 
+/**
+ * 决定用哪个 Node 跑后端。
+ *
+ * 默认**不需要机器上装 Node**：VS Code 自己是 Electron，把 ELECTRON_RUN_AS_NODE=1
+ * 塞进去，同一个可执行文件就变成了 Node（实测 Node 24.20 / Electron 43）。
+ * 只有设置了 qzcode.nodePath 才用外部 node。
+ */
+function resolveNode(options = {}) {
+  const setting = String(options.nodePath ?? '').trim()
+  const execPath = options.execPath ?? process.execPath
+  const isElectron = options.isElectron ?? Boolean(process.versions && process.versions.electron)
+
+  if (setting && setting !== 'node' && setting !== 'auto') {
+    return { command: setting, env: {}, source: 'setting', describe: `外部 node（设置里指定）：${setting}` }
+  }
+
+  if (isElectron && execPath) {
+    return {
+      command: execPath,
+      env: { ELECTRON_RUN_AS_NODE: '1' },
+      source: 'electron',
+      describe: `VS Code 自带运行时（不需要装 Node）：${execPath}`,
+    }
+  }
+
+  return { command: 'node', env: {}, source: 'path', describe: 'PATH 里的 node（非 Electron 环境）' }
+}
+
 function resolveCliPath(options) {
   const candidates = []
   if (options.setting) candidates.push({ path: options.setting, source: 'setting' })
@@ -207,6 +235,7 @@ function settingsWebviewHtml(options) {
 }
 
 module.exports = {
+  resolveNode,
   parseServerUrl,
   browserUrl,
   buildServerArgs,

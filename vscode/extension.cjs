@@ -171,7 +171,7 @@ function settings() {
   const config = vscode.workspace.getConfiguration('qzcode')
   return {
     cliPath: config.get('cliPath') || '',
-    nodePath: config.get('nodePath') || 'node',
+    nodePath: config.get('nodePath') || '',
     configFile: config.get('configFile') || '',
     mock: config.get('mock') === true,
     exec: config.get('exec') !== false,
@@ -593,13 +593,21 @@ async function ensureServer() {
     output().appendLine(`[backend] ${resolved.source} → ${resolved.path}`)
 
     const serverStarted = Date.now()
-    output().appendLine(`[start] ${config.nodePath} ${args.join(' ')}`)
+    // 默认用 VS Code 自带的运行时（不需要装 Node），只有设置里指定了才用外部 node
+    const nodeRuntime = lib.resolveNode({ nodePath: config.nodePath })
+    output().appendLine(`[start] ${nodeRuntime.command} ${args.join(' ')}`)
+    output().appendLine(`[runtime] ${nodeRuntime.describe}`)
     setStatus('$(sync~spin) QZcode 启动中')
 
-    const child = spawn(config.nodePath, args, {
+    const child = spawn(nodeRuntime.command, args, {
       cwd: root || path.dirname(resolved.path),
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, QZCODE_VSCODE: '1' },
+      env: {
+        ...process.env,
+        ...(typeof env === 'object' && env ? env : {}),
+        ...nodeRuntime.env,
+        QZCODE_VSCODE: '1',
+      },
       windowsHide: true,
     })
     runtime.child = child
