@@ -9,7 +9,7 @@ L 管全程（派活 · 盯进度 · 打回返工）
    └→ A 写任务书（提示词 + 验收标准）
         └→ B 带工具实现（读/写/改文件、跑命令、开浏览器验证）
              └→ C 只读核验（跑测试、看截图、给结论）
-                  └→ 不通过就退回 A 重写任务书，最多 N 轮
+                  └→ 不通过就退回 A 重写任务书，最多 3 轮
 ```
 
 装好就能用：**扩展自带后端**，不需要额外安装任何东西，也不需要准备仓库。
@@ -132,7 +132,7 @@ code --install-extension qzcode.vsix --force
 |---|---|---|
 | `qzcode.mock` | `false` | 用脚本化模型，不联网、不需要 key |
 | `qzcode.exec` | `true` | 允许 B/C 执行 shell 命令 |
-| `qzcode.rounds` | `0` | 最大轮次，0 = 用配置文件里的值 |
+| `qzcode.rounds` | `0` | 最大轮次（默认 3 轮：C 不通过 → A 重写 → 重做，最多来回 3 次）。0 = 用配置文件里的值 |
 | `qzcode.configFile` | 空 | `qzcode.json` 路径，留空用工作区里的 |
 | `qzcode.nodePath` | `node` | 跑本地服务的 node |
 | `qzcode.autoStart` | `false` | 打开编辑器就把服务拉起来 |
