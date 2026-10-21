@@ -1,6 +1,0 @@
-QZcode 3.5.3：扩展面板描述改成 README 的定位（四角色接力 / 自带后端）
-
-- package.json description：三模型 → 四角色接力，去掉过时的 Node 版本说法，关键词补 multi-agent / coding agent
-- src/prompts/planner.md：A 的提示词不再自称"三模型流水线"，改成 L/A/B/C 四角色分工
-- src/cli.ts：帮助文案对齐四角色
-- extension.cjs：状态栏提示"点击打开工作台" → "点击打开侧栏聊天"（工作台早已删除）
