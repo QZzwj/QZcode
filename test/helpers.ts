@@ -1,6 +1,7 @@
 import { mkdirSync, rmSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { EXAMPLE_CONFIG, normalizeConfig } from '../src/config.ts'
 import type { AppConfig } from '../src/config.ts'
 import type { TuiInputStream, TuiOutputStream } from '../src/tui/app.ts'
@@ -8,9 +9,11 @@ import type { TuiInputStream, TuiOutputStream } from '../src/tui/app.ts'
 const here = fileURLToPath(new URL('.', import.meta.url))
 
 export function tempWorkspace(name: string): string {
+  // 放系统临时区：这些目录不能位于任何 git 仓库里，
+  // 否则 git / doctor 相关的用例会被外层仓库的存在带偏。
   const dir = join(
-    here,
-    '.tmp',
+    tmpdir(),
+    'qzcode-test',
     `${name}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
   )
   mkdirSync(dir, { recursive: true })

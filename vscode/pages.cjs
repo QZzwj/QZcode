@@ -22,13 +22,13 @@ const CHAT_PAGE = `<!doctype html>
     <div class="app">
       <div class="thread-wrap">
         <div class="rail" id="rail" aria-hidden="true">
-          <span class="rail-node" data-role="leader"></span>
+          <span class="rail-node" data-role="leader">L</span>
           <span class="rail-line"></span>
-          <span class="rail-node" data-role="planner"></span>
+          <span class="rail-node" data-role="planner">A</span>
           <span class="rail-line"></span>
-          <span class="rail-node" data-role="implementer"></span>
+          <span class="rail-node" data-role="implementer">B</span>
           <span class="rail-line"></span>
-          <span class="rail-node" data-role="verifier"></span>
+          <span class="rail-node" data-role="verifier">C</span>
         </div>
         <div id="thread" class="thread">
           <div class="hint" id="hint">

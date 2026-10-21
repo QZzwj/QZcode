@@ -213,7 +213,7 @@ function bubbleFor(pane) {
   const head = el('div', 'head')
   const badge = el('span', `badge ${cls}`)
   badge.textContent = letter
-  const title = el('span')
+  const title = el('span', 'title')
   title.textContent = pane === 'planner' ? '任务书' : pane === 'implementer' ? '实现' : '核验'
   head.append(badge, title)
   const text = el('div', 'text')

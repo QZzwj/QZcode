@@ -4,8 +4,8 @@
  */
 
 :root {
-  --qz-radius: 10px;
-  --qz-radius-sm: 7px;
+  --qz-radius: 4px;
+  --qz-radius-sm: 3px;
   --qz-radius-pill: 999px;
   --qz-fast: 140ms;
 
@@ -21,10 +21,10 @@
   --qz-err: var(--vscode-errorForeground, #f2686a);
   --qz-warn: var(--vscode-editorWarning-foreground, #d8a13a);
 
-  --qz-leader: #8b9cf5;
-  --qz-planner: #b98bf0;
-  --qz-implementer: #4fb3e8;
-  --qz-verifier: #43c295;
+  --qz-leader: var(--vscode-charts-blue, #3794ff);
+  --qz-planner: var(--vscode-charts-purple, #b180d7);
+  --qz-implementer: var(--vscode-charts-green, #89d185);
+  --qz-verifier: var(--vscode-charts-orange, #d18616);
 
   --qz-mono: var(--vscode-editor-font-family, ui-monospace, "Cascadia Code", Consolas, monospace);
 
@@ -46,10 +46,10 @@ body.vscode-light {
   --qz-accent-ink: #ffffff;
   --qz-ok: var(--vscode-testing-iconPassed, #1a7f4b);
   --qz-err: var(--vscode-errorForeground, #b42318);
-  --qz-leader: #5a63c9;
-  --qz-planner: #8b46c8;
-  --qz-implementer: #0b6e99;
-  --qz-verifier: #1a7f5a;
+  --qz-leader: var(--vscode-charts-blue, #3794ff);
+  --qz-planner: var(--vscode-charts-purple, #b180d7);
+  --qz-implementer: var(--vscode-charts-green, #89d185);
+  --qz-verifier: var(--vscode-charts-orange, #d18616);
 }
 
 * { box-sizing: border-box; }
@@ -157,13 +157,13 @@ button.ghost {
 }
 
 button.primary {
-  background: var(--qz-accent);
+  background: var(--vscode-button-background, var(--qz-accent));
   border-color: transparent;
-  color: var(--qz-accent-ink);
+  color: var(--vscode-button-foreground, var(--qz-accent-ink));
   font-weight: 600;
 }
 
-button.primary:hover { filter: brightness(1.06); }
+button.primary:hover { background: var(--vscode-button-hoverBackground, var(--qz-accent)); filter: none; }
 button.ghost:hover { background: var(--qz-surface-2); border-color: var(--qz-accent); }
 button.primary:disabled,
 button.ghost:disabled { opacity: 0.5; cursor: default; }
