@@ -548,6 +548,7 @@ async function ensureServer() {
       runtime.url = null
       output().appendLine(`[exit] 后端退出 code=${code} signal=${signal ?? '-'}`)
     traceBoot(`后端退出 code=${code} signal=${signal ?? '-'}`)
+    if (stderrTail.trim()) traceBoot(`后端报错末尾：${stderrTail.trim().split('\n').slice(-6).join(' | ')}`)
       setStatus('$(error) QZcode 已停止')
       void runtime.chat?.push()
     })
@@ -574,6 +575,19 @@ async function ensureServer() {
         buffer += text
         // 留最后一段错误输出，失败时直接显示在错误页上，不用去翻输出面板
         stderrTail = `${stderrTail}${text}`.slice(-3000)
+      // 落盘一份：面板关掉 / 进程重启后 stderr 就没了，文件才是能查的
+      try {
+        if (runtime.globalDir) {
+          const logFile = path.join(runtime.globalDir, 'backend.log')
+          fs.mkdirSync(runtime.globalDir, { recursive: true })
+          const stat = fs.existsSync(logFile) ? fs.statSync(logFile) : null
+          // 超过 512KB 就重开一份，别无限长
+          if (stat && stat.size > 512 * 1024) fs.writeFileSync(logFile, '', 'utf8')
+          fs.appendFileSync(logFile, `${new Date().toISOString()} ${text}`, 'utf8')
+        }
+      } catch {
+        // 日志写不成不能影响运行
+      }
         output().appendLine(`[server:err] ${text.trimEnd()}`)
         const found = lib.parseServerUrl(buffer)
         if (found) finish(null, found)
