@@ -90,12 +90,16 @@ body {
 }
 
 .thread {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 16px 14px 20px;
 }
+
+.thread > .msg { flex: none; }
 
 /* --------------------------------------------------------- 角色栏（徽章列） */
 
@@ -154,16 +158,21 @@ body {
 
 /* ---------------------------------------------------------------- 空状态 */
 
+/* 没有对话时：整块摆在画面正中间，横向也居中 */
 .hint {
-  padding: 10px 2px;
+  margin: auto;
+  width: 100%;
+  max-width: 460px;
+  padding: 12px 8px;
   color: var(--qz-muted);
   font-size: 13px;
+  text-align: center;
 }
 
 .hint-title {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: var(--qz-fg);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -171,6 +180,7 @@ body {
 .empty-chain {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 4px 8px;
   margin-bottom: 4px;
@@ -192,20 +202,20 @@ body {
 .examples {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 14px;
 }
 
 .example {
-  padding: 5px 10px;
+  padding: 5px 12px;
   border: 1px solid var(--qz-line);
   border-radius: var(--qz-r-pill);
   background: transparent;
   color: var(--qz-muted);
   font: inherit;
   font-size: 12.5px;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
 }

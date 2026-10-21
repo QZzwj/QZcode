@@ -43,7 +43,17 @@ const PAGE = buildPreviewPage({
       { t: 'done', result: { ok: true, rounds: 1, elapsedMs: 18400, usage: { total: 6997 } }, touched: 2 },
       { t: 'run_end', status: 'passed' },
     ],
-    onReady: `window.__EMPTY__ = {
+    onReady: `window.__CENTER__ = (() => {
+        const hint = document.getElementById('hint');
+        const thread = document.getElementById('thread');
+        if (!hint || !thread) return { ok: false, reason: '找不到空状态' };
+        const h = hint.getBoundingClientRect();
+        const t = thread.getBoundingClientRect();
+        const dx = Math.abs((h.left + h.right) / 2 - (t.left + t.right) / 2);
+        const dy = Math.abs((h.top + h.bottom) / 2 - (t.top + t.bottom) / 2);
+        return { ok: dx <= 3 && dy <= 12, dx: Math.round(dx), dy: Math.round(dy), textAlign: getComputedStyle(hint).textAlign };
+      })();
+      window.__EMPTY__ = {
         flow: (document.querySelector('.empty-flow') || {}).textContent || '',
         chain: (document.querySelector('.empty-chain') || {}).textContent || '',
         items: document.querySelectorAll('.empty-chain .flow-item').length,
@@ -152,6 +162,12 @@ const emptyState = await evaluate(`(() => {
   const captured = window.__EMPTY__ || { flow: '', chain: '', items: 0 };
   return { flow: captured.flow, chain: captured.chain, chainItems: captured.items };
 })()`)
+const centerFit = await evaluate(`(() => {
+  // 预览里跑起来后空状态已被替换，所以用一份"刚加载、还没发消息"的快照来衡量
+  return window.__CENTER__ || null;
+})()`)
+check('空状态在画面正中（横竖都居中）', centerFit ? centerFit.ok === true : false, JSON.stringify(centerFit))
+
 check('空状态写着 L 管全程', /L\s*管全程/.test(emptyState.flow), emptyState.flow.trim())
 check('执行链是 A→B→C 三段', emptyState.chainItems === 3 && /写任务书/.test(emptyState.chain) && /核验/.test(emptyState.chain), emptyState.chain.trim())
 
