@@ -55,3 +55,16 @@ test('供应商清单：以前填过 key 的那家也算已配置', () => {
     removeDir(dir)
   }
 })
+
+test('catalog 一定要跟着 roles 一起返回（否则设置面板的供应商下拉是空的）', async () => {
+  const { listRoles } = await import('../src/providers.ts')
+  const dir = tempWorkspace('providers-catalog-in-roles')
+  try {
+    const config = mockConfig(dir)
+    const state = listRoles(config) as { catalog?: unknown[] }
+    assert.ok(Array.isArray(state.catalog), 'listRoles 要返回 catalog')
+    assert.ok((state.catalog ?? []).length > 5, '清单里应该有多个平台可选')
+  } finally {
+    removeDir(dir)
+  }
+})

@@ -346,6 +346,35 @@ function formatDuration(ms) {
   return minutes + 'm' + String(rest).padStart(2, '0') + 's'
 }
 
+/** 读成本：先显示"读取中"，超时给重试，绝不留给用户一块空白。 */
+let costTimer = null
+
+function loadCost() {
+  const box = $('cost-summary')
+  if (box) {
+    box.replaceChildren(el('div', 'dim', '正在读取成本…'))
+  }
+  const body = $('cost-body')
+  if (body) body.replaceChildren()
+
+  vscode.postMessage({ type: 'reloadCost' })
+
+  if (costTimer) clearTimeout(costTimer)
+  costTimer = setTimeout(() => {
+    const target = $('cost-summary')
+    if (!target) return
+    target.replaceChildren()
+    const line = el('div', 'dim', '读取超时：后端没有回应。')
+    const retry = el('button', 'link', '重试')
+    retry.type = 'button'
+    retry.addEventListener('click', () => loadCost())
+    const restart = el('button', 'link', '重启后端')
+    restart.type = 'button'
+    restart.addEventListener('click', () => vscode.postMessage({ type: 'restartServer' }))
+    target.append(line, retry, ' ', restart)
+  }, 5000)
+}
+
 function renderCost() {
   const summaryBox = $('cost-summary')
   const bodyBox = $('cost-body')
@@ -700,7 +729,7 @@ function switchTab(name) {
     if (node) node.hidden = key !== name
   }
   if (name === 'skills') vscode.postMessage({ type: 'reloadSkills' })
-  if (name === 'cost') vscode.postMessage({ type: 'reloadCost' })
+  if (name === 'cost') loadCost()
 }
 
 for (const button of tabButtons) {
@@ -804,6 +833,22 @@ window.addEventListener('message', (event) => {
   }
 
   if (message.type === 'cost') {
+    if (costTimer) {
+      clearTimeout(costTimer)
+      costTimer = null
+    }
+    const box = $('cost-summary')
+    if (message.error) {
+      if (box) {
+        box.replaceChildren()
+        const line = el('div', 'dim', '成本读不出来：' + message.error)
+        const retry = el('button', 'link', '重试')
+        retry.type = 'button'
+        retry.addEventListener('click', () => loadCost())
+        box.append(line, retry)
+      }
+      return
+    }
     costData = message.data ?? null
     renderCost()
     return

@@ -275,6 +275,8 @@ export interface RoleDetail {
 }
 
 export interface RolesState {
+  /** 供应商下拉清单（只是选项，不代表已配置）。 */
+  catalog?: unknown[]
   roles: RoleDetail[]
   providers: ProviderEntry[]
   configPath: string | null
@@ -289,6 +291,8 @@ function maskKey(key: string): string {
 export function listRoles(config: AppConfig): RolesState {
   return {
     providers: listProviders(config).providers,
+    // 下拉用的供应商清单（缺了它设置面板里只剩当前这一家）
+    catalog: listProviders(config).catalog,
     configPath: config.path || null,
     roles: ROLE_NAMES.map((role) => {
       const current = config.roles[role]

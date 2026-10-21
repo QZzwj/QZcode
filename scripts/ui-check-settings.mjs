@@ -228,6 +228,27 @@ const stepTable = await evaluate(`(() => {
   };
 })()`)
 check('步骤表有表头（步骤/最快/平均/用时/调用）', await evaluate("document.querySelectorAll('.step-table .step-head .step-num').length === 4 && /步骤/.test(document.querySelector('.step-table .step-head').textContent)"))
+// 1) 点成本 → 立刻出现"正在读取"
+await evaluate(`document.querySelector('[data-tab="models"]').click()`)
+await sleep(200)
+await evaluate(`document.querySelector('[data-tab="cost"]').click()`)
+await sleep(120)
+const loadingText = await evaluate(`(document.getElementById('cost-summary').textContent || '').trim()`)
+check('点成本先显示"正在读取"（不会空白发呆）', /正在读取/.test(loadingText), loadingText.slice(0, 40))
+
+// 2) 后端报错 → 显示原因 + 重试按钮
+await evaluate(`window.postMessage({ type: 'cost', data: null, error: '连接被拒绝' }, '*')`)
+await sleep(150)
+const errorState = await evaluate(`(() => ({
+  text: (document.getElementById('cost-summary').textContent || '').trim(),
+  retry: Boolean([...document.querySelectorAll('#cost-summary .link')].find((n) => n.textContent.includes('重试'))),
+}))()`)
+check('成本读取失败时说明原因并给重试', /连接被拒绝/.test(errorState.text) && errorState.retry === true, JSON.stringify(errorState))
+
+// 3) 恢复：正常数据还能渲染
+await evaluate(`window.postMessage({ type: 'cost', data: { currency: 'CNY', today: 0.04, total: 1.2, runs: 3, budget: 1, remaining: 0.96, overBudget: false, byRole: {}, recent: [], steps: [] } }, '*')`)
+await sleep(200)
+
 check('成本页按步骤列出速度与耗时', stepTable.rows === 4, JSON.stringify(stepTable.names))
 check('每一步都有最快速度', stepTable.best.join(',') === '180.4,212.0,143.1,98.2', stepTable.best.join(','))
 check('久的时间显示成 1m36s 这种', stepTable.duration[2] === '1m36s', stepTable.duration.join(','))

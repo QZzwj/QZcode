@@ -265,9 +265,20 @@ function showSettings() {
         return
       }
       if (message.type === 'reloadCost') {
-        await ensureServer()
-        const data = await api('/api/cost').catch(() => null)
-        panel.webview.postMessage({ type: 'cost', data })
+        // 这里必须**永远**回一条消息：以前 ensureServer 一旦抛错，
+        // 面板就停在"空白"，看起来就是"成本页打不开"。
+        try {
+          await ensureServer()
+          const data = await api('/api/cost')
+          panel.webview.postMessage({ type: 'cost', data })
+        } catch (error) {
+          output().appendLine(`[cost] 读取失败: ${error.message}`)
+          panel.webview.postMessage({
+            type: 'cost',
+            data: null,
+            error: String(error.message ?? error),
+          })
+        }
         return
       }
       if (message.type === 'importSkill') {
