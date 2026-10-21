@@ -32,6 +32,7 @@ const CHAT_PAGE = `<!doctype html>
         </div>
         <div id="thread" class="thread">
           <div class="hint" id="hint">
+            <div class="hint-brand"><b>QZ</b>code</div>
             <div class="hint-title">一句话目标，四个模型接力</div>
             <div class="empty-flow">
               <span class="flow-item"><b class="role-l">L</b>管全程</span>

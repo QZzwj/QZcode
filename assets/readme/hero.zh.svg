@@ -33,7 +33,7 @@
   <text x="88" y="457" font-size="21" fill="#D6E2F0" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">轮次用完就 failed 收尾，不无限烧钱</text>
 
   <text x="64" y="546" font-size="19" fill="#6B7E96" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">node src/cli.ts --mock</text>
-  <text x="300" y="546" font-size="19" fill="#4F6076" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"># 不联网先看一遍全流程</text>
+  <text x="330" y="546" font-size="19" fill="#4F6076" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"># 不联网跑一遍全流程</text>
 
   <!-- 右：一次运行的回路 -->
   <rect x="640" y="96" width="496" height="440" rx="20" fill="#0E1622" stroke="#1E2B3D"/>

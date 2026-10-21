@@ -169,6 +169,20 @@ body {
   text-align: center;
 }
 
+/* 品牌行：QZ 加粗，code 用常规字重 */
+.hint-brand {
+  margin-bottom: 6px;
+  font-family: var(--qz-mono);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--qz-muted);
+}
+
+.hint-brand b {
+  font-weight: 800;
+  color: var(--qz-fg);
+}
+
 .hint-title {
   margin-bottom: 12px;
   color: var(--qz-fg);

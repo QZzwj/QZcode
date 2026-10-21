@@ -60,11 +60,18 @@ const PAGE = buildPreviewPage({
           ? { text: thinking.textContent.trim(), dots: thinking.querySelectorAll('.dots i').length }
           : null;
       }, 260);
-      window.__EMPTY__ = {
-        flow: (document.querySelector('.empty-flow') || {}).textContent || '',
-        chain: (document.querySelector('.empty-chain') || {}).textContent || '',
-        items: document.querySelectorAll('.empty-chain .flow-item').length,
-      };
+      window.__EMPTY__ = (() => {
+        const brandNode = document.querySelector('.hint-brand');
+        const bold = brandNode ? brandNode.querySelector('b') : null;
+        return {
+          flow: (document.querySelector('.empty-flow') || {}).textContent || '',
+          chain: (document.querySelector('.empty-chain') || {}).textContent || '',
+          items: document.querySelectorAll('.empty-chain .flow-item').length,
+          brand: brandNode ? brandNode.textContent.trim() : '',
+          brandBold: bold ? Number(getComputedStyle(bold).fontWeight) : 0,
+          brandNormal: brandNode ? Number(getComputedStyle(brandNode).fontWeight) : 0,
+        };
+      })();
       document.getElementById('input').value = '帮我制作一个跳一跳的 HTML 小游戏';
       document.getElementById('send').click();`,
   }),
@@ -174,6 +181,16 @@ const centerFit = await evaluate(`(() => {
   return window.__CENTER__ || null;
 })()`)
 check('空状态在画面正中（横竖都居中）', centerFit ? centerFit.ok === true : false, JSON.stringify(centerFit))
+
+const brand = await evaluate(`(() => {
+  const saved = window.__EMPTY__ || {};
+  return {
+    text: saved.brand || '',
+    boldWeight: saved.brandBold || 0,
+    normalWeight: saved.brandNormal || 0,
+  };
+})()`)
+check('空状态顶部有 QZcode 品牌行，QZ 加粗', /QZcode/.test(brand.text) && brand.boldWeight > brand.normalWeight, JSON.stringify(brand))
 
 check('空状态写着 L 管全程', /L\s*管全程/.test(emptyState.flow), emptyState.flow.trim())
 check('执行链是 A→B→C 三段', emptyState.chainItems === 3 && /写任务书/.test(emptyState.chain) && /核验/.test(emptyState.chain), emptyState.chain.trim())

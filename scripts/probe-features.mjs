@@ -16,7 +16,7 @@ const of = openSync(out, 'w')
 const ef = openSync(err, 'w')
 const child = spawn(
   process.execPath,
-  ['D:/hhd/pi/vscode/backend/dist/cli.js', 'web', '--mock', '--no-open', '--port', '0', '--workspace', dir, '--config', configPath],
+  ['D:/example/qzcode/vscode/backend/dist/cli.js', 'web', '--mock', '--no-open', '--port', '0', '--workspace', dir, '--config', configPath],
   { cwd: dir, stdio: ['ignore', of, ef], windowsHide: true, env: { ...process.env, QZCODE_MOCK_DELAY: '0' } },
 )
 closeSync(of)
@@ -96,7 +96,7 @@ const out2 = join(dir, 'o2.log')
 const of2 = openSync(out2, 'w')
 const child2 = spawn(
   process.execPath,
-  ['D:/hhd/pi/vscode/backend/dist/cli.js', 'web', '--mock', '--no-open', '--port', '0', '--workspace', dir, '--config', configPath],
+  ['D:/example/qzcode/vscode/backend/dist/cli.js', 'web', '--mock', '--no-open', '--port', '0', '--workspace', dir, '--config', configPath],
   { cwd: dir, stdio: ['ignore', of2, 'ignore'], windowsHide: true, env: { ...process.env, QZCODE_MOCK_DELAY: '0' } },
 )
 closeSync(of2)
