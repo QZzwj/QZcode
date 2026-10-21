@@ -71,7 +71,7 @@ if (existing.status === 200) {
 
   // 2) 把 vsix 作为附件传上去
   const asset = readFileSync(`qzcode-${VERSION}.vsix`)
-  const uploadUrl = payload.upload_url.replace(/\{.*\}$/, '') + '?name=qzcode-${VERSION}.vsix'
+  const uploadUrl = payload.upload_url.replace(/\{.*\}$/, '') + `?name=qzcode-${VERSION}.vsix`
   const uploaded = await fetch(uploadUrl, {
     method: 'POST',
     headers: {

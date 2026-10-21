@@ -1,4 +1,7 @@
 import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+
+const VERSION = process.env.QZ_VERSION ?? JSON.parse(readFileSync(new URL('../vscode/package.json', import.meta.url), 'utf8')).version
 
 /** 用已配置的 git 凭据核对 release（匿名 API 有速率限制，会 403）。 */
 function token() {
@@ -17,7 +20,7 @@ const headers = {
   'x-github-api-version': '2022-11-28',
 }
 
-const res = await fetch('https://api.github.com/repos/QZzwj/QZcode/releases/tags/v3.5.8', { headers })
+const res = await fetch(`https://api.github.com/repos/QZzwj/QZcode/releases/tags/v${VERSION}`, { headers })
 console.log('  release 查询: HTTP', res.status)
 const data = await res.json()
 if (!res.ok) {
