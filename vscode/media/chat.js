@@ -256,7 +256,7 @@ function bubbleFor(pane) {
   const chips = el('div', 'chips')
   row.append(head, text, tools, chips)
   thread.append(row)
-  const entry = { text, tools, chips, buffer: '', timer: null }
+  const entry = { row, text, tools, chips, buffer: '', timer: null }
   view.bubbles.set(key, entry)
   scrollDown()
   return entry
@@ -315,11 +315,20 @@ function addPatch(event) {
   scrollDown()
 }
 
-function addTag(pane, text, cls) {
+function addTag(pane, text, cls, options = {}) {
   const entry = bubbleFor(pane)
   const tag = el('span', `tag ${cls ?? ''}`)
   tag.textContent = text
-  entry.chips.append(tag)
+
+  if (options.center === true) {
+    // 结论（通过 / 未通过）是这一轮的结果，单独占一行、居中，别混在细节标签里
+    tag.classList.add('verdict')
+    const row = el('div', 'verdict-row')
+    row.append(tag)
+    entry.row.append(row)
+  } else {
+    entry.chips.append(tag)
+  }
   scrollDown()
 }
 
@@ -374,7 +383,12 @@ function handle(event) {
       addTag('planner', `任务书 · ${event.plan?.acceptance?.length ?? 0} 条验收`)
       break
     case 'verdict':
-      addTag('verifier', event.verdict?.pass ? '✔ 通过' : '✘ 未通过', event.verdict?.pass ? 'pass' : 'fail')
+      addTag(
+        'verifier',
+        event.verdict?.pass ? '✔ 通过' : '✘ 未通过',
+        event.verdict?.pass ? 'pass' : 'fail',
+        { center: true },
+      )
       break
     case 'note':
       if (event.message) setStatus(event.message, event.level === 'error' ? 'err' : undefined)

@@ -269,6 +269,23 @@ check('diff 块能展开且有 +/− 配色', patchUi.expanded === true && /78,\
 check('diff 块不横向溢出', patchUi.noOverflow === true)
 check('输入框下面有 git 自动提交开关', patchUi.hasToggle === true)
 
+const verdictUi = await evaluate(`(() => {
+  const row = document.querySelector('.verdict-row');
+  const tag = document.querySelector('.tag.verdict');
+  const thread = document.getElementById('thread').getBoundingClientRect();
+  if (!row || !tag) return { found: false };
+  const r = tag.getBoundingClientRect();
+  const dx = Math.abs((r.left + r.right) / 2 - (thread.left + thread.right) / 2);
+  return {
+    found: true,
+    text: tag.textContent.trim(),
+    dx: Math.round(dx),
+    centered: getComputedStyle(row).justifyContent,
+    fontSize: parseFloat(getComputedStyle(tag).fontSize),
+  };
+})()`)
+check('通过结论居中显示', verdictUi.found === true && verdictUi.dx <= 3 && verdictUi.centered === 'center', JSON.stringify(verdictUi))
+
 check('阶段标签有通过/退回', layout.tags.some((t) => /退回/.test(t)) && layout.tags.some((t) => /通过/.test(t)), layout.tags.join(' | '))
 check('结束后轨道整条点亮', layout.railPast === 4, `past=${layout.railPast}`)
 check('图标全部是 SVG（无字符图标）', layout.glyphIcons === 0 && layout.svgIcons >= 3, `svg=${layout.svgIcons} glyph=${layout.glyphIcons}`)
