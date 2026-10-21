@@ -562,3 +562,22 @@ test('侧栏空状态：L 管全程，A→B→C 是执行链', () => {
   assert.match(leader, /主控/, 'L 的定位是主控')
   assert.match(leader, /管的是全程/, '要写清管全程')
 })
+
+test('saveVision 必须在设置面板的处理器里（放错面板会让按钮永远"保存中…"）', () => {
+  const ext = readFileSync(join(repoRoot, 'vscode', 'extension.cjs'), 'utf8')
+  const panelStart = ext.indexOf('panel.webview.onDidReceiveMessage')
+  assert.ok(panelStart > 0, '要能找到设置面板的消息处理器')
+
+  const chatSection = ext.slice(0, panelStart)
+  const panelSection = ext.slice(panelStart)
+
+  assert.ok(!chatSection.includes("message.type === 'saveVision'"), '聊天面板不该处理视觉设置')
+  assert.match(panelSection, /message\.type === 'saveVision'/, '设置面板要处理视觉设置')
+  // 回应必须发回 panel，不能发回侧栏的 view
+  const handlerBlock = panelSection.slice(
+    panelSection.indexOf("message.type === 'saveVision'"),
+    panelSection.indexOf("message.type === 'saveVision'") + 900,
+  )
+  assert.match(handlerBlock, /panel\.webview\.postMessage/, '结果要回到设置面板')
+  assert.doesNotMatch(handlerBlock, /this\.view\.webview\.postMessage/, '不能把结果发到侧栏')
+})

@@ -167,6 +167,20 @@ check('多入口平台标出"N 个版本"', providerSelect.hasVersions === true)
 check('「自定义」只出现一次', providerSelect.customCount === 1, JSON.stringify({ custom: providerSelect.customCount }))
 
 check('C 的卡片里有视觉设置块（其他角色没有）', visionUi.count === 1, JSON.stringify({ count: visionUi.count, title: visionUi.title }))
+// 点保存：先"保存中…"，再收到结果
+await evaluate(`document.getElementById('vision-save').click()`)
+await sleep(150)
+const savingText = await evaluate(`(document.getElementById('vision-status').textContent || '').trim()`)
+check('点保存先显示"保存中…"', /保存中/.test(savingText), savingText.slice(0, 30))
+
+await evaluate(`window.postMessage({ type: 'visionSaved', result: { ok: true, ready: true, vision: { enabled: true, model: 'gpt-4o' } } }, '*')`)
+await sleep(200)
+const savedText = await evaluate(`(() => ({
+  text: (document.getElementById('vision-status').textContent || '').trim(),
+  ok: document.getElementById('vision-status').className.includes('ok'),
+}))()`)
+check('收到结果后按钮不再是"保存中"（不会卡死）', !/保存中/.test(savedText.text) && savedText.ok === true, JSON.stringify(savedText))
+
 check('视觉开关默认关闭、设置区收起', visionUi.checked === false && visionUi.bodyHidden === true)
 check('视觉模型输入框提示要看图模型', /gpt-4o|qwen-vl|glm-4v/i.test(visionUi.modelPlaceholder ?? ''), visionUi.modelPlaceholder)
 

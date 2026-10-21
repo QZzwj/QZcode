@@ -120,6 +120,8 @@ function visionBlock(vision) {
     body.hidden = !enabled.checked
   })
 
+  let saveTimer = null
+
   save.addEventListener('click', () => {
     vscode.postMessage({
       type: 'saveVision',
@@ -132,7 +134,22 @@ function visionBlock(vision) {
     })
     status.className = 'vision-status'
     status.textContent = '保存中…'
+
+    // 兜底：后端/扩展一旦没回消息，8 秒后必须给个说法，不能一直转
+    if (saveTimer) clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => {
+      status.className = 'vision-status err'
+      status.textContent = '保存超时：后端没回应，再点一次保存'
+    }, 8000)
   })
+
+  // 收到结果就清掉超时
+  window.__clearVisionTimer__ = () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer)
+      saveTimer = null
+    }
+  }
 
   box.append(body)
   return box
@@ -762,6 +779,8 @@ window.addEventListener('message', (event) => {
   if (!message || typeof message !== 'object') return
 
   if (message.type === 'visionSaved') {
+    if (window.__clearVisionTimer__) window.__clearVisionTimer__()
+    if (message.result && message.result.vision) state.vision = message.result.vision
     const status = document.getElementById('vision-status')
     if (status) {
       const ok = message.result && message.result.ok

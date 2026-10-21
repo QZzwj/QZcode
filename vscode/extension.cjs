@@ -54,19 +54,6 @@ class ChatView {
 
     view.webview.onDidReceiveMessage(async (message) => {
       if (!message || typeof message !== 'object') return
-      if (message.type === 'saveVision') {
-        try {
-          const result = await api('/api/vision', { ...message, type: undefined })
-          this.view.webview.postMessage({ type: 'visionSaved', result })
-          output().appendLine(`[vision] 开关=${message.enabled ? '开' : '关'} 模型=${message.model || '(空)'}`)
-        } catch (error) {
-          this.view.webview.postMessage({
-            type: 'visionSaved',
-            result: { ok: false, error: String(error.message) },
-          })
-        }
-        return
-      }
       if (message.type === 'setGit') {
         try {
           await api('/api/git', { autoCommit: message.autoCommit === true })
@@ -261,6 +248,32 @@ function showSettings() {
           panel.webview.postMessage({ type: 'skills', catalog: catalog.skills ?? [] })
         } catch (error) {
           panel.webview.postMessage({ type: 'removed', result: { ok: false, error: String(error.message ?? error) } })
+        }
+        return
+      }
+      if (message.type === 'saveVision') {
+        // 视觉设置是设置面板里的按钮，消息必须回到这个 panel 上，
+        // 回到侧栏的 view 等于没回应（按钮会永远停在"保存中…"）
+        try {
+          await ensureServer()
+          const result = await api('/api/vision', {
+            enabled: message.enabled === true,
+            model: message.model,
+            baseUrl: message.baseUrl,
+            apiKey: message.apiKey,
+            maxImages: message.maxImages,
+            question: message.question,
+          })
+          panel.webview.postMessage({ type: 'visionSaved', result })
+          output().appendLine(
+            `[vision] 开关=${message.enabled ? '开' : '关'} 模型=${message.model || '(空)'} 已写入配置=${result.saved === true}`,
+          )
+        } catch (error) {
+          output().appendLine(`[vision] 保存失败: ${error.message}`)
+          panel.webview.postMessage({
+            type: 'visionSaved',
+            result: { ok: false, error: String(error.message ?? error) },
+          })
         }
         return
       }
