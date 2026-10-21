@@ -165,7 +165,18 @@ async function cancellableWait(ms: number, signal?: AbortSignal): Promise<void> 
 function killTree(child: { pid?: number; kill: () => boolean }): void {
   try {
     if (process.platform === 'win32' && child.pid) {
-      spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' })
+      // spawn 找不到可执行文件时会发 'error' 事件；不接住它 = 整个后端进程崩掉
+      const killer = spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], {
+        windowsHide: true,
+        stdio: 'ignore',
+      })
+      killer.on('error', () => {
+        try {
+          child.kill()
+        } catch {
+          // 已经没了
+        }
+      })
       return
     }
     child.kill()

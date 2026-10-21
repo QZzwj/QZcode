@@ -547,6 +547,7 @@ async function ensureServer() {
       runtime.child = null
       runtime.url = null
       output().appendLine(`[exit] 后端退出 code=${code} signal=${signal ?? '-'}`)
+    traceBoot(`后端退出 code=${code} signal=${signal ?? '-'}`)
       setStatus('$(error) QZcode 已停止')
       void runtime.chat?.push()
     })

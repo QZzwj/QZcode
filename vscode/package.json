@@ -2,7 +2,7 @@
   "name": "qzcode",
   "displayName": "QZcode",
   "description": "QZcode：三模型流水线（A 写提示词与验收标准 → B 实现 → C 只读核验）。自带已编译后端，装好即用：不需要克隆仓库、不需要构建、Node ≥ 18 即可。",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "publisher": "qzcode",
   "license": "MIT",
   "author": "QZzwj",

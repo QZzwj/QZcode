@@ -449,6 +449,19 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
         push(run, { t: 'run_end', status: run.status })
         logger.info(`web run ${run.id} ${run.status}`)
       } catch (error) {
+        // 把原始错误完整留在输出面板，侧栏只给一句能行动的提示
+        const raw = error as Error
+        logger.error(`[run] ${raw.name ?? 'Error'}: ${raw.message}`)
+        if (raw.stack) logger.error(raw.stack)
+        if (/ENOENT/.test(raw.message)) {
+          const target = raw.message.match(/'([^']+)'/)?.[1] ?? '(未知路径)'
+          push(run, {
+            t: 'note',
+            level: 'error',
+            message: `文件路径不存在：${target}（检查工作区是否还在、是否有写权限）`,
+          })
+        }
+
         const aborted = (error as Error).name === 'AbortError'
         run.status = aborted ? 'cancelled' : 'error'
         run.error = (error as Error).message
