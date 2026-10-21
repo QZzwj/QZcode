@@ -23,7 +23,7 @@
     "test": "node --test --test-isolation=none --test-timeout=30000 \"test/*.test.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check": "npm run typecheck && npm test",
-    "ui:check": "node scripts/ui-check-chat.mjs && node scripts/ui-check-settings.mjs",
+    "ui:check": "node scripts/ui-check-chat.mjs && node scripts/ui-check-settings.mjs && node scripts/ui-check-reconnect.mjs",
     "ui:preview:chat": "node -e \"console.log(require('node:path').join(process.cwd(), 'scripts/preview/chat.html'))\""
   },
   "devDependencies": {
