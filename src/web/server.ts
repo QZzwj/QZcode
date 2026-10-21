@@ -417,7 +417,13 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
             const message = `${config.git.prefix}: ${goal.slice(0, 60)}` + (result.ok ? '' : '（未通过）')
             const committed = await commitPaths(toolRuntime.workspace, touchedPaths, message)
             if (committed.commit) {
-              push(run, { t: 'note', level: 'info', message: `已提交 git：${committed.commit}` })
+              push(run, {
+                t: 'note',
+                level: 'info',
+                message: committed.initialized
+                  ? `已新建 git 仓库并提交：${committed.commit}`
+                  : `已提交 git：${committed.commit}`,
+              })
               logger.info(`[git] ${committed.commit} ${message}`)
             } else if (committed.error) {
               push(run, { t: 'note', level: 'warn', message: `git 提交失败：${committed.error}` })

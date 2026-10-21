@@ -23,8 +23,10 @@ export const DEFAULT_GIT: GitConfig = { autoCommit: false, prefix: 'qzcode' }
 
 export interface GitResult {
   ok: boolean
-  /** 是否是 git 仓库（不是就什么都不做，不报错）。 */
+  /** 提交之后一定是仓库了（不是的话这次会先 git init）。 */
   repo: boolean
+  /** 这次是不是新建的仓库。 */
+  initialized?: boolean
   commit?: string
   error?: string
   skipped?: string
@@ -57,7 +59,17 @@ export async function commitPaths(
   message: string,
 ): Promise<GitResult> {
   if (paths.length === 0) return { ok: true, repo: true, skipped: '这次没有改动文件' }
-  if (!(await isGitRepo(workspace))) return { ok: true, repo: false, skipped: '工作区不是 git 仓库' }
+
+  // 不是仓库就先 git init：不建仓库的话自动提交永远是一句"没有提交"，
+  // 这个开关就等于没用。
+  let initialized = false
+  if (!(await isGitRepo(workspace))) {
+    const init = await git(workspace, ['init'])
+    if (!init.ok) {
+      return { ok: false, repo: false, error: `git init 失败：${init.stderr || init.stdout}` }
+    }
+    initialized = true
+  }
 
   // 只暂存这次碰过的文件（已删除的用 -A 也只会 stage 这些路径）
   const staged = await git(workspace, ['add', '--', ...paths])
@@ -72,11 +84,24 @@ export async function commitPaths(
   }
 
   const commit = await git(workspace, ['commit', '-m', message, '--no-verify'])
+  if (!commit.ok && /empty ident name|tell me who you are|unable to auto-detect email/i.test(commit.stderr + commit.stdout)) {
+    // 机器上没配 git 身份：只给这一条命令临时补一个，不写进用户的 git 配置
+    const retried = await git(workspace, [
+      '-c', 'user.name=QZcode',
+      '-c', 'user.email=qzcode@local',
+      'commit', '-m', message, '--no-verify',
+    ])
+    if (retried.ok) {
+      const head = await git(workspace, ['rev-parse', '--short', 'HEAD'])
+      return { ok: true, repo: true, initialized, commit: head.ok ? head.stdout : undefined }
+    }
+    return { ok: false, repo: true, error: `git commit 失败：${retried.stderr || retried.stdout}` }
+  }
   if (!commit.ok) {
     return { ok: false, repo: true, error: `git commit 失败：${commit.stderr || commit.stdout}` }
   }
   const head = await git(workspace, ['rev-parse', '--short', 'HEAD'])
-  return { ok: true, repo: true, commit: head.ok ? head.stdout : undefined }
+  return { ok: true, repo: true, initialized, commit: head.ok ? head.stdout : undefined }
 }
 
 /** 当前 HEAD（给界面显示"基于哪个提交"）。 */

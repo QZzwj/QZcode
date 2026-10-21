@@ -20,14 +20,25 @@ async function makeRepo(dir: string): Promise<boolean> {
   }
 }
 
-test('git：不是仓库时不报错，只是跳过', async () => {
+test('git：不是仓库时先 git init 再提交（不然开关等于没用）', async () => {
   const dir = tempWorkspace('git-norepo')
   try {
-    assert.equal(await isGitRepo(dir), false)
-    const result = await commitPaths(dir, ['a.txt'], 'qzcode: test')
-    assert.equal(result.ok, true)
-    assert.equal(result.repo, false)
-    assert.match(result.skipped ?? '', /不是 git 仓库/)
+    writeFileSync(join(dir, 'a.txt'), 'hello\n', 'utf8')
+    assert.equal(await isGitRepo(dir), false, '起始状态不该是仓库')
+
+    const result = await commitPaths(dir, ['a.txt'], 'qzcode: 第一次提交')
+    assert.equal(result.ok, true, result.error)
+    assert.equal(result.repo, true, '提交完后就是仓库了')
+    assert.equal(result.initialized, true, '要标记出"这次新建了仓库"')
+    assert.ok(result.commit, '应该有提交号')
+    assert.equal(await isGitRepo(dir), true)
+
+    // 第二次提交就不该再 init
+    writeFileSync(join(dir, 'a.txt'), 'hello again\n', 'utf8')
+    const again = await commitPaths(dir, ['a.txt'], 'qzcode: 第二次')
+    assert.equal(again.ok, true, again.error)
+    assert.equal(again.initialized, false, '第二次不该再 init')
+    assert.ok(again.commit)
   } finally {
     removeDir(dir)
   }

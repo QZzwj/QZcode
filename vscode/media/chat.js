@@ -794,9 +794,15 @@ function renderGit() {
   const box = $('git-auto')
   const hint = $('git-hint')
   if (!toggle || !box || !hint) return
-  toggle.hidden = gitState.repo !== true
+  // 没仓库也照常显示开关：打开后第一次提交会自动 git init
+  toggle.hidden = false
   box.checked = gitState.autoCommit === true
-  hint.textContent = gitState.repo === true ? '' : '（工作区不是 git 仓库）'
+  hint.textContent =
+    gitState.repo === true
+      ? ''
+      : gitState.autoCommit === true
+        ? '（不是 git 仓库：下次提交会自动 git init）'
+        : '（不是 git 仓库，开启后会自动建一个）'
 }
 
 const gitBox = $("git-auto")
