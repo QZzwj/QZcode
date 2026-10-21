@@ -94,7 +94,7 @@ node src/cli.ts run "把 README 里的 TODO 都实现掉"   # 一次性，纯文
 ```powershell
 # 打包成 vsix 再装（VS Code 1.9x 的 --install-extension 只认 vsix）
 node node_modules\@vscode\vsce\vsce package --allow-missing-repository --no-dependencies --skip-license -o qzcode-0.1.0.vsix --cwd vscode
-code --install-extension D:\hhd\pi\qzcode-0.1.0.vsix --force
+code --install-extension D:\example\qzcode\qzcode-0.1.0.vsix --force
 # 卸载：code --uninstall-extension qzcode.qzcode
 ```
 

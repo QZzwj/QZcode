@@ -46,7 +46,7 @@ qzcode.cliPath（设置，仅开发时用）
 
 **方式二：调试模式（不装扩展）**
 
-用 VS Code 打开 `D:\hhd\pi`，按 `F5`（扩展开发宿主）。仓库里已经带了 `.vscode/launch.json`：
+用 VS Code 打开 `D:\example\qzcode`，按 `F5`（扩展开发宿主）。仓库里已经带了 `.vscode/launch.json`：
 
 ```json
 {

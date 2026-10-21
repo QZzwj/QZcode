@@ -14,7 +14,7 @@ const PAGE = buildPreviewPage({
   name: 'chat',
   stub: vscodeStub({
     startDelayMs: 1100,
-    init: { providers: { providers: [], current: { provider: 'ghd', model: 'deepseek-v4.1-flash', mock: false } } },
+    init: { providers: { providers: [], current: { provider: 'gatewaya', model: 'deepseek-chat', mock: false } } },
     events: [
       { t: 'route', decision: { route: 'pipeline', why: '要改动代码' } },
       { t: 'phase', phase: 'plan', round: 1 },
@@ -267,6 +267,18 @@ const patchUi = await evaluate(`(() => {
 check('文件改动以 diff 形式显示', patchUi.hasPatch === true && /index\.html/.test(patchUi.headText), patchUi.headText.slice(0, 40))
 check('diff 块能展开且有 +/− 配色', patchUi.expanded === true && /78,\s*201,\s*165/.test(patchUi.addColor ?? '') && /242,\s*112,\s*95/.test(patchUi.delColor ?? ''), JSON.stringify({ add: patchUi.addColor, del: patchUi.delColor }))
 check('diff 块不横向溢出', patchUi.noOverflow === true)
+const entries = await evaluate(`(() => {
+  const plan = document.getElementById('plan-first');
+  const links = [...document.querySelectorAll('.snapshot-actions .link')].map((n) => n.textContent.trim());
+  return {
+    hasPlanToggle: Boolean(plan) && plan.type === 'checkbox',
+    links,
+  };
+})()`)
+check('输入框下面有「先看任务书」开关', entries.hasPlanToggle === true)
+check('结束后有「查看本轮记录」入口', entries.links.some((text) => /本轮记录/.test(text)), JSON.stringify(entries.links))
+check('结束后能按单个文件回滚', entries.links.some((text) => /回滚某个文件/.test(text)), JSON.stringify(entries.links))
+
 check('输入框下面有 git 自动提交开关', patchUi.hasToggle === true)
 
 const verdictUi = await evaluate(`(() => {

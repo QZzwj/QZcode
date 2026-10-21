@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { basename, join, resolve } from 'node:path'
 
 /* 把后端编译成纯 JS 并塞进扩展包，让扩展真正独立：
  *   vscode/backend/dist/**       ← tsc 输出（.ts 导入已被改写成 .js）
@@ -42,7 +42,8 @@ if (existsSync(join(repo, 'qzcode.example.json'))) {
   cpSync(join(repo, 'qzcode.example.json'), join(target, 'qzcode.example.json'))
 }
 cpSync(join(repo, 'README.md'), join(target, 'README.md'))
-writeFileSync(join(target, 'VERSION'), `${new Date().toISOString()}\n构建自: ${repo}\n`, 'utf8')
+// 只记仓库名，不写本机绝对路径：这个文件会进 vsix，路径会跟着公布出去
+writeFileSync(join(target, 'VERSION'), `${new Date().toISOString()}\n构建自: ${basename(repo)}\n`, 'utf8')
 
 function size(dir) {
   let total = 0

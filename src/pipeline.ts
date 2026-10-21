@@ -50,6 +50,8 @@ export interface ReviewAttempt {
 }
 
 export interface RunResult {
+  /** 计划模式：只出了任务书，还没动手。 */
+  planned?: boolean
   ok: boolean
   rounds: number
   plan: Plan | null
@@ -81,6 +83,17 @@ export interface PipelineOptions {
   >
   /** Kernel event sink: extensions observe the run through these events. */
   emit?: (event: string, payload?: unknown) => void
+  /**
+   * 计划模式：只跑到 A 出任务书就停，把任务书交给用户确认。
+   * 用户点头后再用 presetPlan 起一轮真正的执行。
+   */
+  planOnly?: boolean
+  /** 已经确认过的任务书：跳过 L 和 A，直接进 B（顺带省掉这两步的 token）。 */
+  presetPlan?: Plan
+  /** 上一轮留下的上下文（目标/结论/改动清单），避免每轮从零开始。 */
+  previousContext?: string
+  /** 用户用 @文件 指定的参考文件内容（已拼好的 markdown 片段）。 */
+  reference?: string
 }
 
 function hooksFor(reporter: Reporter, pane: PaneId): AgentHooks {
@@ -223,28 +236,57 @@ export async function runPipeline(options: PipelineOptions): Promise<RunResult> 
   for (let round = 1; round <= config.maxRounds; round++) {
     if (signal?.aborted) break
 
-    reporter.phase('plan', round)
-    const planned = await inRole('planner', round, () =>
-      planStep(
-        { client: clients.planner, toolbox, toolRuntime, config, signal },
-        {
-          goal,
-          round,
-          workspace: toolRuntime.workspace,
-          previousIssues: verdict?.issues,
-          previousSummary: verdict?.summary,
-        },
-        hooksFor(reporter, 'planner'),
-      ),
-    )
-    trackUsage('planner', planned.usage)
-    plan = planned.plan
-    reporter.plan?.(round, plan)
-    if (!planned.plan.parsed) {
-      reporter.note('A 没有按要求输出 JSON，已降级用全文作为任务书（验收标准可能缺失）。', 'warn')
+    let currentPlan: Plan
+    if (options.presetPlan && round === 1) {
+      // 用户已经确认过任务书：直接用它，不再花 A 的 token
+      currentPlan = options.presetPlan
+      reporter.phase('plan', round)
+      reporter.note('沿用你确认过的任务书，跳过 A。', 'info')
+      reporter.plan?.(round, currentPlan)
+    } else {
+      reporter.phase('plan', round)
+      const planned = await inRole('planner', round, () =>
+        planStep(
+          { client: clients.planner, toolbox, toolRuntime, config, signal },
+          {
+            goal,
+            round,
+            workspace: toolRuntime.workspace,
+            previousIssues: verdict?.issues,
+            previousSummary: verdict?.summary,
+            previousContext: options.previousContext,
+            reference: options.reference,
+          },
+          hooksFor(reporter, 'planner'),
+        ),
+      )
+      trackUsage('planner', planned.usage)
+      currentPlan = planned.plan
+      reporter.plan?.(round, currentPlan)
+      if (!planned.plan.parsed) {
+        reporter.note('A 没有按要求输出 JSON，已降级用全文作为任务书（验收标准可能缺失）。', 'warn')
+      }
+      if (planned.plan.acceptance.length === 0) {
+        reporter.note('A 没给验收标准，C 会把这记为 major。', 'warn')
+      }
     }
-    if (planned.plan.acceptance.length === 0) {
-      reporter.note('A 没给验收标准，C 会把这记为 major。', 'warn')
+    plan = currentPlan
+
+    // 计划模式：任务书出来了就停，等用户确认
+    if (options.planOnly === true) {
+      reporter.phase('done', round)
+      return finish({
+        cost: runCost(config.cost, usageByRole, modelByRole),
+        ok: true,
+        planned: true,
+        rounds: round,
+        plan,
+        verdict: null,
+        usage,
+        elapsedMs: Date.now() - startedAt,
+        history: [],
+        implementerReport: '',
+      })
     }
 
     if (signal?.aborted) break
@@ -252,7 +294,7 @@ export async function runPipeline(options: PipelineOptions): Promise<RunResult> 
     let implemented = await inRole('implementer', round, () =>
       implementStep(
         { client: clients.implementer, toolbox, toolRuntime, config, signal },
-        { plan: planned.plan, goal, round, messages: implementerMessages },
+        { plan: currentPlan, goal, round, messages: implementerMessages },
         hooksFor(reporter, 'implementer'),
       ),
     )
@@ -269,7 +311,7 @@ export async function runPipeline(options: PipelineOptions): Promise<RunResult> 
             { client: clients.planner, toolbox, toolRuntime, config, signal },
             {
               goal,
-              plan: planned.plan,
+              plan: currentPlan,
               round,
               attempt,
               implementerReport,
@@ -305,12 +347,12 @@ export async function runPipeline(options: PipelineOptions): Promise<RunResult> 
           implementStep(
             { client: clients.implementer, toolbox, toolRuntime, config, signal },
             {
-              plan: planned.plan,
+              plan: currentPlan,
               goal,
               round: attempt + 1,
               messages: [
                 ...implemented.messages,
-                { role: 'user' as const, content: correctionBrief(reviewed.review, planned.plan, round, attempt) },
+                { role: 'user' as const, content: correctionBrief(reviewed.review, currentPlan, round, attempt) },
               ],
             },
             hooksFor(reporter, 'implementer'),
@@ -328,7 +370,7 @@ export async function runPipeline(options: PipelineOptions): Promise<RunResult> 
       verifyStep(
         { client: clients.verifier, toolbox, toolRuntime, config, signal },
         {
-          plan: planned.plan,
+          plan: currentPlan,
           goal,
           round,
           implementerReport,

@@ -14,8 +14,8 @@
 
 | 你填什么 | 走哪条路 |
 | --- | --- |
-| `D:\hhd\output\gpt6\SKILL.md` | 本地文件 |
-| `D:\hhd\output\gpt6`（目录，含 SKILL.md） | 本地目录 |
+| `~/skills/my-skill/SKILL.md` | 本地文件 |
+| `~/skills/my-skill`（目录，含 SKILL.md） | 本地目录 |
 | `https://raw.githubusercontent.com/…/SKILL.md` | 下载 |
 | 直接粘贴 markdown 正文 | 当成文本 |
 

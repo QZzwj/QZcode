@@ -68,10 +68,60 @@ class ChatView {
         output().appendLine(`[webview] ${String(message.error).slice(0, 500)}`)
         return
       }
+      if (message.type === 'openRunLog') {
+        await openRunLog(message.path)
+        return
+      }
+      if (message.type === 'rollbackFile') {
+        try {
+          await ensureServer()
+          const runId = String(message.runId ?? '')
+          const list = await api(`/api/snapshot${runId ? `?id=${encodeURIComponent(runId)}` : ''}`)
+          const entries = Array.isArray(list.entries) ? list.entries : []
+          if (entries.length === 0) {
+            vscode.window.showInformationMessage('这次运行没有改动文件，没得回滚。')
+            return
+          }
+          const picked = await vscode.window.showQuickPick(
+            entries.map((entry) => ({
+              label: entry.path,
+              description: entry.status === 'created' ? '新建（回滚会删掉）' : '修改（回滚会还原）',
+            })),
+            { placeHolder: '回滚哪个文件？可多选', canPickMany: true },
+          )
+          if (!picked || picked.length === 0) return
+          const result = await api('/api/rollback', {
+            runId: list.runId,
+            paths: picked.map((item) => item.label),
+          })
+          const restored = (result.restored ?? []).length
+          const deleted = (result.deleted ?? []).length
+          vscode.window.showInformationMessage(
+            `已回滚 ${restored} 个文件${deleted > 0 ? `，删掉新增 ${deleted} 个` : ''}`,
+          )
+        } catch (error) {
+          vscode.window.showWarningMessage(`按文件回滚失败：${error.message}`)
+        }
+        return
+      }
+      if (message.type === 'continuePlan') {
+        try {
+          await ensureServer()
+          const result = await api('/api/continue', { runId: message.runId })
+          this.view.webview.postMessage({ type: 'continued', result })
+          output().appendLine(`[plan] 继续执行 → ${result.runId ?? 'FAIL'}`)
+        } catch (error) {
+          this.view.webview.postMessage({
+            type: 'continued',
+            result: { ok: false, error: String(error.message ?? error) },
+          })
+        }
+        return
+      }
       if (message.type === 'ready') await this.push()
       // 侧栏拿到了空/过期地址时会主动来要；这里确保服务起着并把最新地址推回去
       else if (message.type === 'showDiff') await showRunDiff()
-      else if (message.type === 'rollback') await rollbackRun()
+      else if (message.type === 'rollback') await rollbackRun(message.runId)
       else if (message.type === 'needUrl') await pushFreshUrl()
       else if (message.type === 'restartServer') await vscode.commands.executeCommand('qzcode.restart')
       else if (message.type === 'pickProvider') await chooseProvider()
@@ -459,6 +509,17 @@ async function chooseProvider() {
 /** resolveCliPath 会 stat 一堆候选路径；缓存结果，重启时不再扫盘。 */
 let cliPathCache = null
 
+/** 后端有没有正在跑的运行（切工作区时用来判断要不要拦一下）。 */
+async function hasRunningRun() {
+  try {
+    const list = await api('/api/runs').catch(() => null)
+    const runs = Array.isArray(list?.runs) ? list.runs : []
+    return runs.some((run) => run.status === 'running')
+  } catch {
+    return false
+  }
+}
+
 async function ensureServer() {
   if (runtime.url) return runtime.url
   if (runtime.starting) return runtime.starting
@@ -637,7 +698,44 @@ async function api(pathname, body) {
 /** 状态栏跟着服务里的运行状态走：轮次、阶段、通过与否。 */
 /** 侧栏说连不上：先探活；活着就只重推地址，真死了才杀掉重启。 */
   /** 看本次运行改了什么：走 VS Code 原生 diff（左边快照，右边现状）。 */
-  async function showRunDiff() {
+  /** 打开某一轮的 .qzcode/runN.md（侧栏按钮和命令都走这里）。 */
+async function openRunLog(pathArg) {
+  const workspace = runtime.workspace || workspaceRoot()
+  if (!workspace) {
+    vscode.window.showWarningMessage('还没有工作区，找不到运行记录。')
+    return
+  }
+
+  let target = typeof pathArg === 'string' && pathArg ? pathArg : ''
+  if (!target) {
+    const dir = path.join(workspace, '.qzcode')
+    const files = fs.existsSync(dir)
+      ? fs
+          .readdirSync(dir)
+          .filter((name) => /^run\d+\.md$/.test(name))
+          .sort((a, b) => Number(b.match(/\d+/)[0]) - Number(a.match(/\d+/)[0]))
+      : []
+    if (files.length === 0) {
+      vscode.window.showInformationMessage('还没有运行记录：跑一次任务就会生成 .qzcode/run1.md。')
+      return
+    }
+    const picked = await vscode.window.showQuickPick(
+      files.map((name) => ({ label: name, description: path.join('.qzcode', name) })),
+      { placeHolder: '看哪一轮的记录？' },
+    )
+    if (!picked) return
+    target = path.join(dir, picked.label)
+  }
+
+  try {
+    const document = await vscode.workspace.openTextDocument(target)
+    await vscode.window.showTextDocument(document, { preview: true })
+  } catch (error) {
+    vscode.window.showWarningMessage(`打不开记录文件：${error.message}`)
+  }
+}
+
+async function showRunDiff() {
     let payload
     try {
       payload = await api('/api/diff')
@@ -902,6 +1000,20 @@ function activate(context) {
       // 后端还没起来时不要"重启"（runtime.workspace 为空 = 首次启动中，
       // 以前这里会把它刚起好的进程杀掉再起一遍，加载时间直接翻倍）
       if (!next || !runtime.workspace || next === runtime.workspace) return
+
+      // 正在跑任务时切工作区 = 后端被杀、这轮活白干：先问一句
+      if (await hasRunningRun()) {
+        const choice = await vscode.window.showWarningMessage(
+          'QZcode 正在跑任务，切工作区会中断它。',
+          { modal: true },
+          '停止并切换',
+          '等它跑完',
+        )
+        if (choice !== '停止并切换') {
+          output().appendLine('[workspace] 用户选择先不切（有任务在跑）')
+          return
+        }
+      }
       output().appendLine(`[workspace] 切到 ${next}，重启后端…`)
       stopServer()
       try {
@@ -1024,6 +1136,7 @@ function activate(context) {
       vscode.window.showInformationMessage('QZcode 服务已停止')
     }),
 
+    vscode.commands.registerCommand('qzcode.openRunLog', (pathArg) => openRunLog(pathArg)),
     vscode.commands.registerCommand('qzcode.showDiff', async () => {
       await showRunDiff()
     }),

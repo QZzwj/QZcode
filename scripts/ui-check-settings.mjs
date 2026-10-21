@@ -7,24 +7,24 @@ import { tmpdir } from 'node:os'
 /** 设置面板验收：同一套规则（对比度 / 焦点 / 触摸 / 溢出 / 三页签渲染）。 */
 
 const PAGE = buildPreviewPage({ kind: 'settings', name: 'settings', stub: vscodeStub({
-    init: { providers: { providers: [], current: { provider: 'ghd', model: 'cn:auto', mock: false } } },
+    init: { providers: { providers: [], current: { provider: 'gatewaya', model: 'cn:auto', mock: false } } },
     events: [],
     onReady: `
       const role = (name, title, model) => ({
-        role: name, title, provider: 'ghd', baseUrl: 'http://8.134.108.99:7863/v1', model,
+        role: name, title, provider: 'gatewaya', baseUrl: 'https://gateway.example.com/v1', model,
         hasKey: true, keyHint: 'sk-5…d672', hasKeyForProvider: true, temperature: 0.3,
         maxTokens: 16384, headers: {}, timeoutMs: 180000, retries: 2, mock: false, custom: true, skills: [],
       });
       window.postMessage({ type: 'state', state: {
         roles: [
-          role('leader', 'L · 调度（分流，省 token）', 'gpt-6.1-sol'),
-          role('planner', 'A · 规划（prompt + guidance）', 'gpt-6.1-sol'),
-          role('implementer', 'B · 实现（tools）', 'cn:deepseek-v4.1-flash'),
-          role('verifier', 'C · 核验（read-only + tests）', 'cn:deepseek-v4.1-flash'),
+          role('leader', 'L · 调度（分流，省 token）', 'gw-model-1'),
+          role('planner', 'A · 规划（prompt + guidance）', 'gw-model-1'),
+          role('implementer', 'B · 实现（tools）', 'cn:deepseek-chat'),
+          role('verifier', 'C · 核验（read-only + tests）', 'cn:deepseek-chat'),
         ],
         providers: [],
         catalog: [
-          { id: 'hhd', label: 'hhd', name: 'hhd', site: 'ruoli.dev', baseUrl: 'https://ruoli.dev/v1', model: 'gpt-6.1-sol', needsRoute: false, current: false },
+          { id: 'gatewaya', label: 'gatewaya', name: 'gatewaya', site: 'gateway.example.com', baseUrl: 'https://gateway.example.com/v1', model: 'gw-model-1', needsRoute: false, current: false },
           { id: 'deepseek', label: 'DeepSeek · platform.deepseek.com', name: 'DeepSeek', site: 'platform.deepseek.com', baseUrl: 'https://api.deepseek.com/v1', model: 'deepseek-chat', needsRoute: false, current: false },
           { id: 'ant-ling', label: 'BaiLing · developer.ant-ling.com', name: 'BaiLing', site: 'developer.ant-ling.com', baseUrl: '', model: '', needsRoute: true, current: false },
           { id: 'kimi', label: 'Kimi · platform.kimi.com · 4 个版本', name: 'Kimi', site: 'platform.kimi.com', baseUrl: 'https://api.moonshot.cn/v1', model: 'kimi-k2-turbo-preview', needsRoute: false, current: false },
@@ -34,7 +34,7 @@ const PAGE = buildPreviewPage({ kind: 'settings', name: 'settings', stub: vscode
           maxTokens: 500, timeoutMs: 60000, maxImages: 8, question: '请客观描述这张截图',
         },
         configPath: 'C:\\Users\\jn\\qzcode.json',
-        workspace: 'D:\\hhd\\demo',
+        workspace: 'D:\\gatewaya\\demo',
       } }, '*');
       window.postMessage({ type: 'skills', catalog: [
         { name: 'code-implementer', title: '实现纪律（B）', roles: ['implementer'], source: 'builtin', description: '先读再改' },
@@ -44,7 +44,7 @@ const PAGE = buildPreviewPage({ kind: 'settings', name: 'settings', stub: vscode
       ] }, '*');
       setTimeout(() => window.postMessage({
         type: 'tested', role: 'planner',
-        result: { ok: true, ms: 1683, model: 'gpt-6.1-sol', models: new Array(56).fill({ id: 'x' }) },
+        result: { ok: true, ms: 1683, model: 'gw-model-1', models: new Array(56).fill({ id: 'x' }) },
       }, '*'), 60);
     `,
   }) })

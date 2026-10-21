@@ -716,3 +716,17 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* 行内小号主按钮（"按这个做"这种确认动作） */
+.primary-mini {
+  padding: 3px 12px;
+  border: 1px solid var(--qz-accent);
+  border-radius: var(--qz-r-pill);
+  background: var(--qz-accent);
+  color: var(--qz-accent-ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.primary-mini:hover { background: var(--qz-accent-hover); border-color: var(--qz-accent-hover); }

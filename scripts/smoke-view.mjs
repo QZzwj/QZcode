@@ -56,7 +56,7 @@ const vscode = {
     onDidChangeActiveTextEditor: () => disposable(),
   },
   workspace: {
-    workspaceFolders: [{ uri: uri('D:/hhd/pi') }],
+    workspaceFolders: [{ uri: uri('D:/example/qzcode') }],
     getConfiguration: () => ({ get: () => undefined, update: async () => {} }),
     onDidChangeConfiguration: () => disposable(),
     onDidChangeWorkspaceFolders: () => disposable(),
@@ -84,8 +84,8 @@ const require2 = createRequire(import.meta.url)
 const ext = require2('../vscode/extension.cjs')
 
 const context = {
-  extensionPath: 'D:/hhd/pi/vscode',
-  extensionUri: uri('D:/hhd/pi/vscode'),
+  extensionPath: 'D:/example/qzcode/vscode',
+  extensionUri: uri('D:/example/qzcode/vscode'),
   globalStorageUri: uri(process.env.TEMP + '/qz-global'),
   subscriptions: [],
   extension: { packageJSON: { version: '0.0.0-test' } },

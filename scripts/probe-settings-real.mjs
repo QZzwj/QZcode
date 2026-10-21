@@ -11,7 +11,7 @@ const dir = join(tmpdir(), 'qz-state-real-' + Date.now())
 mkdirSync(dir, { recursive: true })
 const child = spawn(
   process.execPath,
-  ['D:/hhd/pi/vscode/backend/dist/cli.js', 'web', '--no-open', '--port', '0', '--workspace', dir, '--config', userConfig],
+  ['D:/example/qzcode/vscode/backend/dist/cli.js', 'web', '--no-open', '--port', '0', '--workspace', dir, '--config', userConfig],
   { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },
 )
 let buffer = ''

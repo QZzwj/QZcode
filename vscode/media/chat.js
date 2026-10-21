@@ -24,6 +24,8 @@ const view = {
   bubbles: new Map(),
   /** 已经收到多少条事件：断线重连时从这个下标继续（后端支持 ?since=） */
   eventCount: 0,
+  /** 最近一次运行的 id（取消后仍能据此回滚） */
+  lastRunId: '',
   /** 重连次数，用来退避和给用户看进度 */
   retries: 0,
   retryTimer: null,
@@ -404,15 +406,41 @@ function handle(event) {
       setStatus(
         `${result.ok ? '✔ 完成' : '✘ 未通过'} · ${result.rounds} 轮 · ${seconds}s · ${result.usage?.total ?? 0} tok`,
       )
+      // 计划模式：任务书出了但还没动手，等用户点头
+      if (result.planned === true) {
+        setStatus('任务书已出，等你确认', 'ok')
+        const box = el('div', 'snapshot-actions')
+        box.id = 'plan-actions'
+        const go = el('button', 'primary-mini', '按这个做')
+        go.type = 'button'
+        go.addEventListener('click', () => {
+          box.remove()
+          vscode.postMessage({ type: 'continuePlan', runId: view.runId ?? '' })
+        })
+        box.append('要先看一眼任务书？确认后我再动手。 ', go)
+        thread.append(box)
+        scrollDown()
+      }
+
       const touched = event.touched ?? 0
+      const runId = view.runId ?? ''
       if (touched > 0) {
         const box = el('div', 'hint snapshot-actions')
         box.append(`本次运行改动了 ${touched} 个文件：`)
         const diff = el('button', 'link', '查看改动')
         diff.addEventListener('click', () => vscode.postMessage({ type: 'showDiff' }))
-        const rollback = el('button', 'link', '回滚')
+        const rollback = el('button', 'link', '全部回滚')
         rollback.addEventListener('click', () => vscode.postMessage({ type: 'rollback' }))
-        box.append(diff, ' 或 ', rollback)
+        const one = el('button', 'link', '回滚某个文件')
+        one.addEventListener('click', () => vscode.postMessage({ type: 'rollbackFile', runId }))
+        box.append(diff, ' · ', one, ' · ', rollback)
+        thread.append(box)
+      }
+      {
+        const box = el('div', 'hint snapshot-actions')
+        const log = el('button', 'link', '查看本轮记录')
+        log.addEventListener('click', () => vscode.postMessage({ type: 'openRunLog' }))
+        box.append(log)
         thread.append(box)
         scrollDown()
       }
@@ -426,7 +454,20 @@ function handle(event) {
       setBusy(false)
       view.runId = null
       closeSource()
-      if (event.status === 'cancelled') setStatus('已取消')
+      if (event.status === 'cancelled') {
+        setStatus('已取消', 'err')
+        // 停下来之后仍然可以回滚这次已经改过的文件
+        const box = el('div', 'hint snapshot-actions')
+        box.append('本次运行已经停下来了，改动还在。')
+        const rollback = el('button', 'link', '回滚这次改动')
+        rollback.addEventListener('click', () =>
+          vscode.postMessage({ type: 'rollback', runId: view.lastRunId }),
+        )
+        box.append(' ', rollback)
+        thread.append(box)
+        scrollDown()
+      }
+      if (event.status === 'planned') setStatus('任务书已出，等你确认', 'ok')
       break
     default:
       break
@@ -462,6 +503,7 @@ function setBusy(busy) {
 function subscribe(runId, since = 0) {
   closeSource()
   view.runId = runId
+  view.lastRunId = runId
   if (since === 0) {
     view.eventCount = 0
     view.retries = 0
@@ -608,7 +650,10 @@ async function send() {
       fetch(`${base}/api/run`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ goal }),
+        body: JSON.stringify({
+          goal,
+          planOnly: Boolean($('plan-first') && $('plan-first').checked),
+        }),
       }),
     )
     const payload = await response.json()
@@ -776,6 +821,20 @@ window.addEventListener('message', async (event) => {
     applyProvider(message.providers)
     if (message.error) setStatus(message.error, 'err')
     else if (!view.busy) setStatus('')
+    return
+  }
+  if (message.type === 'continued') {
+    const payload = message.result || {}
+    if (payload.ok && payload.runId) {
+      const box = document.getElementById('plan-actions')
+      if (box) box.remove()
+      view.bubbles.clear()
+      view.round = 0
+      setBusy(true)
+      subscribe(payload.runId)
+    } else {
+      setStatus(payload.error || '继续执行失败', 'err')
+    }
     return
   }
   if (message.type === 'providers') {

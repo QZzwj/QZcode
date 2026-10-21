@@ -30,8 +30,8 @@ function role(name: string, title: string, model: string) {
   return {
     role: name,
     title,
-    provider: 'hhd',
-    baseUrl: 'http://8.134.108.99:7863/v1',
+    provider: 'gatewaya',
+    baseUrl: 'https://gateway.example.com/v1',
     model,
     hasKey: true,
     keyHint: 'sk-5…d672',
@@ -50,15 +50,15 @@ function roleState() {
   return {
     roles: [
       role('leader', 'L · 调度', 'cn:auto'),
-      role('planner', 'A · 规划', 'cn:deepseek-v4.1-flash'),
-      role('implementer', 'B · 实现', 'cn:deepseek-v4.1-flash'),
+      role('planner', 'A · 规划', 'cn:deepseek-chat'),
+      role('implementer', 'B · 实现', 'cn:deepseek-chat'),
       role('verifier', 'C · 核验', 'cn:deepseek-v4-pro'),
     ],
     providers: [
       {
-        id: 'hhd',
-        label: 'hhd',
-        baseUrl: 'http://8.134.108.99:7863/v1',
+        id: 'gatewaya',
+        label: 'gatewaya',
+        baseUrl: 'https://gateway.example.com/v1',
         model: 'cn:auto',
         envKey: '',
         active: true,
@@ -128,7 +128,7 @@ test('设置面板：反馈落在各自卡片里，不在页面底部', async ()
     send({
       type: 'tested',
       role: 'planner',
-      result: { ok: true, ms: 1683, model: 'cn:deepseek-v4.1-flash', models: new Array(56).fill({ id: 'x' }) },
+      result: { ok: true, ms: 1683, model: 'cn:deepseek-chat', models: new Array(56).fill({ id: 'x' }) },
     })
     const plannerStatus = findByClass(cards.children[1] as FakeNode, 'card-status')[0]
     assert.match(textOf(plannerStatus), /连接正常 · 1683ms/, '反馈要在 A 卡片里')
@@ -162,17 +162,17 @@ test('设置面板：反馈落在各自卡片里，不在页面底部', async ()
     send({
       type: 'models',
       role: 'implementer',
-      result: { ok: true, ms: 300, models: [{ id: 'cn:deepseek-v4.1-flash', contextLength: 1000000, credits: 'x0.11' }] },
+      result: { ok: true, ms: 300, models: [{ id: 'cn:deepseek-chat', contextLength: 1000000, credits: 'x0.11' }] },
     })
     const implCards = doc.all.get('cards') as FakeNode
     const implCard = implCards.children[2] as FakeNode
     assert.match(textOf(findByClass(implCard, 'card-status')[0]), /1 个模型/)
-    assert.match(textOf(implCard), /cn:deepseek-v4\.1-flash · 1000k 上下文 · x0\.11/, '下拉里要有带上下文的选项')
+    assert.match(textOf(implCard), /cn:deepseek-chat · 1000k 上下文 · x0\.11/, '下拉里要有带上下文的选项')
     // 重渲染后下拉也要还原（不然每次保存都要重拉）
     send({ type: 'state', state: roleState() })
     assert.match(
       textOf(implCards.children[2] as FakeNode),
-      /cn:deepseek-v4\.1-flash · 1000k 上下文/,
+      /cn:deepseek-chat · 1000k 上下文/,
       '重渲染后模型下拉要还原',
     )
   } finally {

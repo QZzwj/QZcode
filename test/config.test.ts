@@ -124,16 +124,16 @@ test('leader 默认开启且只给很少的输出预算', () => {
 test('老配置里没有 leader 也能加载，并继承 planner 的连接', () => {
   const legacy = {
     roles: {
-      planner: { provider: 'hhd', baseUrl: 'https://gw.example.com/v1', model: 'gw-model', apiKey: 'sk-hhd' },
-      implementer: { provider: 'hhd', baseUrl: 'https://gw.example.com/v1', model: 'gw-model', apiKey: 'sk-hhd' },
-      verifier: { provider: 'hhd', baseUrl: 'https://gw.example.com/v1', model: 'gw-model', apiKey: 'sk-hhd' },
+      planner: { provider: 'gatewaya', baseUrl: 'https://gw.example.com/v1', model: 'gw-model', apiKey: 'sk-demo' },
+      implementer: { provider: 'gatewaya', baseUrl: 'https://gw.example.com/v1', model: 'gw-model', apiKey: 'sk-demo' },
+      verifier: { provider: 'gatewaya', baseUrl: 'https://gw.example.com/v1', model: 'gw-model', apiKey: 'sk-demo' },
     },
   }
   const config = normalizeConfig(legacy, { cwd: 'C:\\work' })
   const leader = config.roles.leader
-  assert.equal(leader.provider, 'hhd', '要跟 planner 用同一家，而不是退回 deepseek 预设')
+  assert.equal(leader.provider, 'gatewaya', '要跟 planner 用同一家，而不是退回 deepseek 预设')
   assert.equal(leader.baseUrl, 'https://gw.example.com/v1')
-  assert.equal(leader.apiKey, 'sk-hhd', '没有 key 的话第一步就会 401')
+  assert.equal(leader.apiKey, 'sk-demo', '没有 key 的话第一步就会 401')
   assert.equal(leader.model, 'gw-model', '模型也要跟上，否则端点不认')
   assert.equal(config.leader.enabled, true)
 })

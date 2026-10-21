@@ -12,7 +12,7 @@ const ef = openSync(err, 'w')
 const t0 = Date.now()
 const child = spawn(
   process.execPath,
-  ['D:/hhd/pi/vscode/backend/dist/cli.js', 'web', '--mock', '--no-open', '--port', '0', '--workspace', dir, '--config', join(dir, 'qzcode.json')],
+  ['D:/example/qzcode/vscode/backend/dist/cli.js', 'web', '--mock', '--no-open', '--port', '0', '--workspace', dir, '--config', join(dir, 'qzcode.json')],
   { cwd: dir, stdio: ['ignore', of, ef], windowsHide: true },
 )
 closeSync(of)

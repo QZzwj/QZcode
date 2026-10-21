@@ -528,7 +528,7 @@ function buildCard(role) {
   const modelInput = el('input')
   modelInput.type = 'text'
   modelInput.value = role.model ?? ''
-  modelInput.placeholder = '模型名，例如 cn:deepseek-v4.1-flash'
+  modelInput.placeholder = '模型名，例如 cn:deepseek-chat'
   const fetchButton = el('button', 'ghost', '获取模型')
   modelRow.append(modelInput, fetchButton)
   card.append(field('模型', modelRow, '点「获取模型」从端点拉清单，或者直接填'))

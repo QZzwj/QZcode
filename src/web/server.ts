@@ -18,6 +18,7 @@ import { commitPaths, headShort, isGitRepo } from '../git.ts'
 import { createStepMeter, stepSpeeds, type StepStat } from '../steps.ts'
 import { describeImage } from '../vision.ts'
 import { writeRunLog } from '../runlog.ts'
+import { buildReferenceBlock, extractFileRefs } from '../reference.ts'
 import { formatDoctor, runDoctor } from '../doctor.ts'
 import { diffSnapshot, listSnapshots, loadSnapshot, restoreFromIndex, SnapshotStore } from '../snapshot.ts'
 import { importSkill, listSkills } from '../skills.ts'
@@ -49,7 +50,7 @@ export type UiEvent =
   | { t: 'done'; result: RunResult; touched?: number }
   | { t: 'run_end'; status: RunStatus }
 
-export type RunStatus = 'running' | 'passed' | 'failed' | 'cancelled' | 'error'
+export type RunStatus = 'running' | 'passed' | 'failed' | 'cancelled' | 'error' | 'planned'
 
 interface RunState {
   id: string
@@ -61,6 +62,9 @@ interface RunState {
   seq: number
   error?: string
   abort?: AbortController
+  /** 这一轮的记录文件（<工作区>/.qzcode/runN.md）。 */
+  runLogPath?: string
+  runLogIndex?: number
   /** 各步骤的模型耗时与输出 token（跑完填）。 */
   steps?: StepStat[]
   bestSteps?: Array<{ role: RoleName; tokPerSec: number }>
@@ -107,6 +111,47 @@ async function persistGit(config: AppConfig, autoCommit: boolean): Promise<boole
     return true
   } catch {
     return false
+  }
+}
+
+/**
+ * 每个工作区记住"上一轮干了什么"：目标、结论、改动过的文件、核验意见。
+ * 下一轮开始时把这段塞给 A（不塞给 B/C，省 token），
+ * 这样"把它改成深色"这种话不需要重新交代背景。
+ */
+const lastContextByWorkspace = new Map<string, string>()
+
+export function lastRunContext(workspace: string): string | undefined {
+  const text = lastContextByWorkspace.get(workspace)
+  return text && text.trim() ? text : undefined
+}
+
+export function rememberRunContext(workspace: string, run: RunState, status: string, result: unknown): void {
+  try {
+    const events = run.events as Array<Record<string, unknown>>
+    const patches = events.filter((event) => event.t === 'patch')
+    const files = [...new Set(patches.map((event) => String(event.path ?? '')).filter(Boolean))].slice(0, 12)
+    const verdict = events.filter((event) => event.t === 'verdict').pop() as
+      | { verdict?: { pass?: boolean; notes?: string } }
+      | undefined
+    const plan = events.filter((event) => event.t === 'plan').pop() as
+      | { plan?: { acceptance?: string[] } }
+      | undefined
+    const usage = (result as { usage?: { total?: number } } | null)?.usage
+
+    const lines: string[] = []
+    lines.push(`上一轮目标：${run.goal.slice(0, 120)}`)
+    lines.push(`上一轮结果：${status === 'passed' ? '通过' : status === 'planned' ? '只出了任务书' : '未通过'}`)
+    if (files.length > 0) lines.push(`改过的文件：${files.join('、')}`)
+    const note = verdict?.verdict?.notes
+    if (note) lines.push(`核验意见：${String(note).replace(/\s+/g, ' ').slice(0, 240)}`)
+    const acceptance = plan?.plan?.acceptance ?? []
+    if (acceptance.length > 0) lines.push(`当时的验收标准：${acceptance.slice(0, 5).join('；')}`)
+    if (usage?.total) lines.push(`上一轮用量：${usage.total} tok`)
+
+    lastContextByWorkspace.set(workspace, lines.join('\n'))
+  } catch {
+    // 记不下来不影响下一轮
   }
 }
 
@@ -297,7 +342,10 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
     },
   })
 
-  const startRun = (goal: string): RunState => {
+  const startRun = (
+    goal: string,
+    options2: { planOnly?: boolean; presetPlan?: unknown; files?: string[] } = {},
+  ): RunState => {
     const run: RunState = {
       id: randomUUID().slice(0, 8),
       goal,
@@ -369,6 +417,24 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
           implementer: meter.wrap(createClient(config.roles.implementer), 'implementer'),
           verifier: meter.wrap(createClient(config.roles.verifier), 'verifier'),
         }
+        // 上一轮留下的上下文：让"把它改成深色"这种话不用重新交代背景
+        // 上一轮留下的上下文：让"把它改成深色"这种话不用重新交代背景
+        const previousContext = options2.planOnly === true ? undefined : lastRunContext(toolRuntime.workspace)
+        // 目标里出现 @文件 就把原文附给 A（前端碰不到文件系统，只能后端读）
+        const extraRefs = Array.isArray(options2.files) ? options2.files : []
+        const refs = [...new Set([...extractFileRefs(goal), ...extraRefs])]
+        const reference = refs.length > 0 ? buildReferenceBlock(toolRuntime.workspace, refs) : { block: '', files: [] }
+        if (refs.length > 0) {
+          const used = reference.files.filter((file) => file.ok)
+          push(run, {
+            t: 'note',
+            level: used.length > 0 ? 'info' : 'warn',
+            message:
+              used.length > 0
+                ? `已附上参考文件：${used.map((file) => file.path).join('、')}`
+                : `@ 引用的文件都没用上：${reference.files.map((file) => `${file.raw}（${file.reason}）`).join('、')}`,
+          })
+        }
         const result = await runPipeline({
           config,
           goal,
@@ -378,7 +444,12 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
           signal: run.abort?.signal,
           emit: options.emit,
           clients,
+          planOnly: options2.planOnly === true,
+          presetPlan: options2.presetPlan as never,
+          previousContext,
+          reference: reference.block || undefined,
         })
+        rememberRunContext(toolRuntime.workspace, run, run.status, result)
         run.steps = meter.snapshot()
         run.bestSteps = (['leader', 'planner', 'implementer', 'verifier'] as const).map((role) => ({
           role,
@@ -391,7 +462,7 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
             `[step] ${stat.role} ${stat.calls} 次 · ${speeds.tokPerSec} tok/s · ${(stat.ms / 1000).toFixed(1)}s · 输出 ${stat.completion} tok`,
           )
         }
-        run.status = result.ok ? 'passed' : 'failed'
+        run.status = result.planned === true ? 'planned' : result.ok ? 'passed' : 'failed'
         // 每轮留一份记录：<工作区>/.qzcode/runN.md（L/A/B/C 各自干了什么）
         {
           const logged = writeRunLog(toolRuntime.workspace, {
@@ -404,14 +475,23 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
             touched: run.snapshot?.entries.length ?? 0,
           })
           if (logged.ok) {
+            run.runLogPath = logged.path
+            run.runLogIndex = logged.index
             push(run, { t: 'note', level: 'info', message: `本轮记录已写入 .qzcode/run${logged.index}.md` })
+            if (run.status === 'planned') {
+              push(run, {
+                t: 'note',
+                level: 'info',
+                message: '这是计划模式：任务书已经出来，确认后点「按这个做」我再动手。',
+              })
+            }
             logger.info(`[runlog] ${logged.path}`)
           } else {
             push(run, { t: 'note', level: 'warn', message: `记录文件没写成：${logged.error}` })
           }
         }
         // 自动 git 提交：只提交这次真改过的文件（路径来自快照，绝不 add -A）
-        if (config.git.autoCommit) {
+        if (config.git.autoCommit && run.status !== 'planned') {
           try {
             const touchedPaths = (run.snapshot?.entries ?? []).map((entry) => entry.path)
             const message = `${config.git.prefix}: ${goal.slice(0, 60)}` + (result.ok ? '' : '（未通过）')
@@ -693,6 +773,21 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
           return
         }
 
+        if (request.method === 'GET' && path === '/api/runs') {
+          const list = [...runs.values()]
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .slice(0, 30)
+            .map((item) => ({
+              id: item.id,
+              goal: item.goal,
+              status: item.status,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            }))
+          sendJson(response, 200, { ok: true, runs: list, running: list.filter((r) => r.status === 'running').length })
+          return
+        }
+
         if (request.method === 'GET' && path === '/api/run') {
           const id = url.searchParams.get('id') ?? ''
           const run = runs.get(id)
@@ -704,6 +799,8 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
             id: run.id,
             goal: run.goal,
             status: run.status,
+        runLogPath: run.runLogPath ?? null,
+        runLogIndex: run.runLogIndex ?? null,
             error: run.error ?? '',
             events: run.events,
           })
@@ -750,10 +847,52 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
           return
         }
 
+        if (request.method === 'POST' && path === '/api/continue') {
+          const body = await readBody(request)
+          const sourceId = String(body.runId ?? '')
+          const planned = runs.get(sourceId)
+          if (!planned) {
+            sendJson(response, 404, { error: `没有这个运行: ${sourceId}` })
+            return
+          }
+          const planEvent = [...planned.events].reverse().find((event) => event.t === 'plan') as
+            | { plan?: { acceptance?: string[] } }
+            | undefined
+          const plan = (planEvent as unknown as { plan?: unknown })?.plan
+          if (!plan) {
+            sendJson(response, 400, { error: '这个运行没有任务书，不能继续执行' })
+            return
+          }
+          const run = startRun(planned.goal, { presetPlan: plan })
+          sendJson(response, 200, { ok: true, runId: run.id, goal: run.goal })
+          return
+        }
+
         if (request.method === 'POST' && path === '/api/run') {
           const body = await readBody(request)
           const goal = String(body.goal ?? '').trim()
-          if (!goal) {
+    const planOnly = body.planOnly === true
+    const presetPlan =
+      body.presetPlan && typeof body.presetPlan === 'object' ? (body.presetPlan as Plan) : undefined
+    const extraFiles = Array.isArray(body.files)
+      ? (body.files as unknown[]).filter((item): item is string => typeof item === 'string')
+      : []
+          // 预算硬闸：今天已经花超了就别再开新一轮
+    {
+      const spent = costLedger().summary(config.cost, config.cost.dailyBudget)
+      const budget = Number(config.cost.dailyBudget ?? 0)
+      if (budget > 0 && spent.today >= budget) {
+        sendJson(response, 402, {
+          error: `今日预算已用完（${formatMoney(spent.today, config.cost.currency)} / ${formatMoney(budget, config.cost.currency)}）。可以在设置 → 成本里调高预算，或明天再跑。`,
+          code: 'budget',
+          today: spent.today,
+          budget,
+        })
+        return
+      }
+    }
+
+    if (!goal) {
             sendJson(response, 400, { error: 'goal 不能为空' })
             return
           }
@@ -762,7 +901,7 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
             sendJson(response, 409, { error: `已有运行在进行中（${active.id}），先取消再开始` })
             return
           }
-          const run = startRun(goal)
+          const run = startRun(goal, { planOnly, presetPlan, files: extraFiles })
           sendJson(response, 200, { runId: run.id })
           return
         }
@@ -869,6 +1008,22 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
           return
         }
 
+        if (request.method === 'GET' && path === '/api/snapshot') {
+          const id = url.searchParams.get('id') ?? ''
+          const runId = id || listSnapshots(toolRuntime.workspace)[0]?.runId || ''
+          const index = runId ? loadSnapshot(toolRuntime.workspace, runId) : null
+          if (!index) {
+            sendJson(response, 404, { ok: false, error: '没有可用的快照' })
+            return
+          }
+          sendJson(response, 200, {
+            ok: true,
+            runId: index.runId,
+            entries: index.entries.map((entry) => ({ path: entry.path, status: entry.file === null ? 'created' : 'modified' })),
+          })
+          return
+        }
+
         if (request.method === 'POST' && path === '/api/rollback') {
           const body = await readBody(request)
           const runId = String(body.runId ?? '') || listSnapshots(toolRuntime.workspace)[0]?.runId || ''
@@ -877,7 +1032,10 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
             sendJson(response, 404, { ok: false, error: '没有可回滚的快照' })
             return
           }
-          const result = restoreFromIndex(toolRuntime.workspace, index)
+          const only = Array.isArray(body.paths)
+      ? (body.paths as unknown[]).filter((item): item is string => typeof item === 'string')
+      : []
+    const result = restoreFromIndex(toolRuntime.workspace, index, only)
           logger.warn(`回滚 ${runId}：恢复 ${result.restored.length} 个、删除 ${result.deleted.length} 个`)
           sendJson(response, 200, { ok: result.failed.length === 0, runId, ...result })
           return

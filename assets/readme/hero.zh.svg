@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="100%" role="img" aria-labelledby="t d">
+  <title id="t">QZcode：三个模型分工的编码流水线</title>
+  <desc id="d">左侧标题与三条硬约束，右侧是一次运行的回路：A 写任务书、B 实现、C 只读核验，不通过就把意见带回 A。</desc>
+
+  <rect x="0" y="0" width="1200" height="600" rx="28" fill="#0B1017"/>
+  <rect x="0.75" y="0.75" width="1198.5" height="598.5" rx="27.25" fill="none" stroke="#1E2B3D" stroke-width="1.5"/>
+
+  <!-- 闸位线：取"三道路闸"的意象，只做背景节奏，不承载文字 -->
+  <g stroke="#14202E" stroke-width="1">
+    <line x1="120" y1="0" x2="120" y2="600"/>
+    <line x1="280" y1="0" x2="280" y2="600"/>
+    <line x1="440" y1="0" x2="440" y2="600"/>
+    <line x1="600" y1="0" x2="600" y2="600"/>
+    <line x1="760" y1="0" x2="760" y2="600"/>
+    <line x1="920" y1="0" x2="920" y2="600"/>
+    <line x1="1080" y1="0" x2="1080" y2="600"/>
+  </g>
+
+  <!-- 左：一句话价值 -->
+  <text x="64" y="136" font-size="19" letter-spacing="2" fill="#6FA8FF" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">L 分流 · A 任务书 · B 实现 · C 核验</text>
+  <text x="64" y="214" font-size="86" font-weight="700" letter-spacing="-1" fill="#F2F7FF" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">QZcode</text>
+  <text x="64" y="266" font-size="24" fill="#C8D6E8" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">让三个模型互相盯，而不是自己说自己对。</text>
+  <text x="64" y="304" font-size="22" fill="#8FA3BC" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">A 写任务书与验收标准 → B 实现 → C 只读核验</text>
+
+  <!-- 左：三条硬约束 -->
+  <rect x="64" y="356" width="4" height="20" fill="#34D399"/>
+  <text x="88" y="373" font-size="21" fill="#D6E2F0" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">B 看不到你的原话，只拿 A 写的任务书</text>
+
+  <rect x="64" y="398" width="4" height="20" fill="#34D399"/>
+  <text x="88" y="415" font-size="21" fill="#D6E2F0" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">C 亲自跑命令，blocker 一票否决 pass</text>
+
+  <rect x="64" y="440" width="4" height="20" fill="#34D399"/>
+  <text x="88" y="457" font-size="21" fill="#D6E2F0" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">轮次用完就 failed 收尾，不无限烧钱</text>
+
+  <text x="64" y="546" font-size="19" fill="#6B7E96" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">node src/cli.ts --mock</text>
+  <text x="300" y="546" font-size="19" fill="#4F6076" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"># 不联网先看一遍全流程</text>
+
+  <!-- 右：一次运行的回路 -->
+  <rect x="640" y="96" width="496" height="440" rx="20" fill="#0E1622" stroke="#1E2B3D"/>
+
+  <text x="668" y="134" font-size="18" letter-spacing="3" fill="#6B7E96" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">一次运行的回路</text>
+
+  <!-- 回退：C 不通过 → 意见带回 A -->
+  <path d="M1071 210 V172 H719 V198" fill="none" stroke="#F0B23E" stroke-width="2" stroke-dasharray="7 6"/>
+  <polygon points="712,194 726,194 719,208" fill="#F0B23E"/>
+  <text x="895" y="160" font-size="18" text-anchor="middle" fill="#F0B23E" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">× 不通过 → 意见带回 A</text>
+
+  <!-- 三个角色 -->
+  <g font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">
+    <rect x="664" y="210" width="110" height="94" rx="14" fill="#131E2C" stroke="#2A3A50"/>
+    <text x="719" y="250" font-size="22" font-weight="700" text-anchor="middle" fill="#EAF2FD">A · 规划</text>
+    <text x="719" y="280" font-size="18" text-anchor="middle" fill="#8FA3BC">写任务书</text>
+
+    <rect x="840" y="210" width="110" height="94" rx="14" fill="#131E2C" stroke="#2A3A50"/>
+    <text x="895" y="250" font-size="22" font-weight="700" text-anchor="middle" fill="#EAF2FD">B · 实现</text>
+    <text x="895" y="280" font-size="18" text-anchor="middle" fill="#8FA3BC">动手改代码</text>
+
+    <rect x="1016" y="210" width="110" height="94" rx="14" fill="#131E2C" stroke="#2A3A50"/>
+    <text x="1071" y="250" font-size="22" font-weight="700" text-anchor="middle" fill="#EAF2FD">C · 核验</text>
+    <text x="1071" y="280" font-size="18" text-anchor="middle" fill="#8FA3BC">只读 + bash</text>
+  </g>
+
+  <!-- 前向：任务书 / 汇报 -->
+  <line x1="774" y1="257" x2="834" y2="257" stroke="#4B6280" stroke-width="2"/>
+  <polygon points="830,251 842,257 830,263" fill="#4B6280"/>
+  <text x="807" y="246" font-size="18" text-anchor="middle" fill="#7A8CA3" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">任务书</text>
+
+  <line x1="950" y1="257" x2="1010" y2="257" stroke="#4B6280" stroke-width="2"/>
+  <polygon points="1006,251 1018,257 1006,263" fill="#4B6280"/>
+  <text x="983" y="246" font-size="18" text-anchor="middle" fill="#7A8CA3" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">汇报</text>
+
+  <!-- 通过 -->
+  <line x1="1071" y1="304" x2="1071" y2="338" stroke="#34D399" stroke-width="2"/>
+  <polygon points="1065,334 1077,334 1071,346" fill="#34D399"/>
+  <rect x="1011" y="346" width="120" height="54" rx="27" fill="#0F2A22" stroke="#34D399"/>
+  <text x="1071" y="381" font-size="20" font-weight="700" text-anchor="middle" fill="#34D399" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">✓ 通过</text>
+
+  <text x="668" y="452" font-size="18" fill="#7A8CA3" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">A 复核跑偏 → 给出修正词，退回 B</text>
+  <text x="668" y="486" font-size="18" fill="#7A8CA3" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">预筛命中 → 不调模型，直接分流</text>
+</svg>

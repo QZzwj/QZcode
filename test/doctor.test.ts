@@ -37,7 +37,7 @@ test('体检：没有 key 的真实角色要报错并给出修法', async () => 
   const dir = tempWorkspace('doctor-nokey')
   try {
     const config = configFor(dir, {
-      planner: { provider: 'ruoli', baseUrl: 'https://ruoli.dev/v1', model: 'gpt-6.1-sol', apiKey: '' },
+      planner: { provider: 'gatewayb', baseUrl: 'https://gateway.example.com/v1', model: 'gw-model-1', apiKey: '' },
     })
     const result = await runDoctor({ config, network: false })
     assert.equal(result.ok, false)
@@ -83,13 +83,13 @@ test('体检：401 要说清是 key 拿错了', async () => {
   const port = (gateway.address() as { port: number }).port
   try {
     const config = configFor(dir, {
-      verifier: { provider: 'ruoli', baseUrl: `http://127.0.0.1:${port}/v1`, model: 'm', apiKey: 'sk-wrong' },
+      verifier: { provider: 'gatewayb', baseUrl: `http://127.0.0.1:${port}/v1`, model: 'm', apiKey: 'sk-wrong' },
     })
     const result = await runDoctor({ config })
     const check = result.checks.find((item) => item.id === 'net.verifier')
     assert.equal(check?.level, 'error')
     assert.match(check?.detail ?? '', /401/)
-    assert.match(check?.fix ?? '', /属于 "ruoli"/)
+    assert.match(check?.fix ?? '', /属于 "gatewayb"/)
   } finally {
     await new Promise<void>((resolve) => gateway.close(() => resolve()))
     removeDir(dir)

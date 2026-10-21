@@ -16,7 +16,7 @@ const of = openSync(out, 'w')
 const ef = openSync(err, 'w')
 const child = spawn(
   process.execPath,
-  ['D:/hhd/pi/vscode/backend/dist/cli.js', 'web', '--no-open', '--port', '0', '--workspace', dir, '--config', configCopy],
+  ['D:/example/qzcode/vscode/backend/dist/cli.js', 'web', '--no-open', '--port', '0', '--workspace', dir, '--config', configCopy],
   { cwd: dir, stdio: ['ignore', of, ef], windowsHide: true },
 )
 closeSync(of)

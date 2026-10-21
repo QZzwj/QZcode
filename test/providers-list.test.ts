@@ -9,10 +9,10 @@ test('供应商清单：只有正在用的那家算已配置', () => {
   const dir = tempWorkspace('providers-list')
   try {
     const config = mockConfig(dir)
-    // 角色用的是 hhd（非预设端点）
+    // 角色用的是 gatewaya（非预设端点）
     for (const role of ['leader', 'planner', 'implementer', 'verifier'] as const) {
-      config.roles[role].provider = 'hhd'
-      config.roles[role].baseUrl = 'https://ruoli.dev/v1'
+      config.roles[role].provider = 'gatewaya'
+      config.roles[role].baseUrl = 'https://gateway.example.com/v1'
       config.roles[role].apiKey = 'sk-test'
     }
 
@@ -20,11 +20,11 @@ test('供应商清单：只有正在用的那家算已配置', () => {
     const mine = state.providers.filter((item) => item.configured === true)
     const presets = state.providers.filter((item) => item.configured !== true)
 
-    assert.deepEqual(mine.map((item) => item.id), ['hhd'], '只有 hhd 是用户配的')
+    assert.deepEqual(mine.map((item) => item.id), ['gatewaya'], '只有 gatewaya 是用户配的')
     assert.ok(presets.length >= 5, '内置预设仍然在清单里（界面会单独分组）')
     assert.ok(
-      presets.every((item) => item.id !== 'hhd'),
-      '预设组里不该出现 hhd',
+      presets.every((item) => item.id !== 'gatewaya'),
+      '预设组里不该出现 gatewaya',
     )
     // 预设里确实包含那几个常见家
     for (const id of ['deepseek', 'openai', 'openrouter', 'moonshot', 'zhipu', 'ollama', 'lmstudio']) {
@@ -42,7 +42,7 @@ test('供应商清单：以前填过 key 的那家也算已配置', () => {
   const dir = tempWorkspace('providers-history')
   try {
     const config = mockConfig(dir)
-    config.roles.planner.provider = 'hhd'
+    config.roles.planner.provider = 'gatewaya'
     config.roles.planner.apiKey = 'sk-test'
     // 以前在 deepseek 上填过 key
     config.roles.implementer.keyHistory = { deepseek: 'sk-deepseek' }
@@ -50,7 +50,7 @@ test('供应商清单：以前填过 key 的那家也算已配置', () => {
 
     const state = listProviders(config)
     const mine = state.providers.filter((item) => item.configured === true).map((item) => item.id)
-    assert.deepEqual(mine.sort(), ['deepseek', 'hhd'], '有 key 历史的那家也算配过')
+    assert.deepEqual(mine.sort(), ['deepseek', 'gatewaya'], '有 key 历史的那家也算配过')
   } finally {
     removeDir(dir)
   }

@@ -637,6 +637,10 @@ export interface PlanStepInput {
   workspace: string
   previousIssues?: Issue[]
   previousSummary?: string
+  /** 用户用 @文件 指定的参考文件（原文）。 */
+  reference?: string
+  /** 上一轮留下的上下文：目标、结论、改动清单（跟着 goal 一起给 A）。 */
+  previousContext?: string
 }
 
 /** A 的任务书最多写几次：第一次不合格就带着"缺什么"再要一次。 */
@@ -663,6 +667,14 @@ export async function planStep(
   }
   if (input.leaderHint?.trim()) {
     sections.push(`## L 的提示（调度模型的判断，仅供参考）\n\n${input.leaderHint.trim()}`)
+  }
+  if (input.previousContext?.trim()) {
+    // 上一轮干过什么：让"把它改成深色"这种话不用重新交代背景
+    sections.push(`## 上一轮的情况（不是本轮目标，只作背景）\n\n${input.previousContext.trim()}`)
+  }
+  if (input.reference?.trim()) {
+    // 用户用 @文件 指过来的原文
+    sections.push(input.reference.trim())
   }
   sections.push('现在按系统提示要求，先给摘要，再给唯一的 ```json 代码块。')
 

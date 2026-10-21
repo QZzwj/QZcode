@@ -32,8 +32,8 @@ const PAGE = buildPreviewPage({
   name: 'layout',
   stub: vscodeStub({
     init: {
-      providers: { providers: [], current: { provider: 'hhd', model: 'deepseek-v4.1-flash', mock: false } },
-      workspace: 'D:\\hhd\\demo\\qzcodetest',
+      providers: { providers: [], current: { provider: 'gatewaya', model: 'deepseek-chat', mock: false } },
+      workspace: 'D:\\gatewaya\\demo\\qzcodetest',
     },
     events,
     onReady: "document.getElementById('input').value = '帮我制作一个跳一跳的 HTML 小游戏'; document.getElementById('send').click();",

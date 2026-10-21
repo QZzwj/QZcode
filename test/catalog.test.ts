@@ -70,7 +70,7 @@ test('清单只是选项：默认没有任何一家算"已配置"', () => {
   try {
     const config = mockConfig(dir)
     for (const role of ['leader', 'planner', 'implementer', 'verifier'] as const) {
-      config.roles[role].provider = 'hhd'
+      config.roles[role].provider = 'gatewaya'
       config.roles[role].apiKey = 'sk-test'
     }
     const state = listProviders(config)
@@ -78,11 +78,11 @@ test('清单只是选项：默认没有任何一家算"已配置"', () => {
     assert.equal(state.catalog.length, PROVIDER_CATALOG.length)
     assert.ok(
       state.catalog.every((item) => item.current === false),
-      'hhd 不在清单里，所以没有条目被标成 current',
+      'gatewaya 不在清单里，所以没有条目被标成 current',
     )
     // 而"已配置"的判定仍然只认真正在用的那家
     const configured = state.providers.filter((item) => item.configured === true).map((item) => item.id)
-    assert.deepEqual(configured, ['hhd'])
+    assert.deepEqual(configured, ['gatewaya'])
   } finally {
     removeDir(dir)
   }

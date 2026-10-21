@@ -434,9 +434,9 @@ test('401 时会提示 key 可能属于别的供应商', async () => {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           role: 'planner',
-          provider: 'ruoli',
+          provider: 'gatewayb',
           baseUrl: `http://127.0.0.1:${port}/v1`,
-          model: 'gpt-6.1-sol',
+          model: 'gw-model-1',
           apiKey: 'sk-from-another-provider',
         }),
       })
@@ -447,7 +447,7 @@ test('401 时会提示 key 可能属于别的供应商', async () => {
       })).json()) as { ok: boolean; error?: string }
       assert.equal(result.ok, false)
       assert.match(result.error ?? '', /401/)
-      assert.match(result.error ?? '', /ruoli/, '要点名是哪家供应商')
+      assert.match(result.error ?? '', /gatewayb/, '要点名是哪家供应商')
       assert.match(result.error ?? '', /key 不匹配|key 属于/, '要提示 key 可能拿错了')
     })
   } finally {

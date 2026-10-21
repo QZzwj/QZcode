@@ -10,7 +10,7 @@ const page = buildPreviewPage({
   kind: 'settings',
   name: 'cost-null',
   stub: vscodeStub({
-    init: { providers: { providers: [], current: { provider: 'hhd', model: 'x', mock: false } } },
+    init: { providers: { providers: [], current: { provider: 'gatewaya', model: 'x', mock: false } } },
     events: [],
     onReady: `
       window.__ERRORS__ = [];

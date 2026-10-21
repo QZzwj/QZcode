@@ -110,7 +110,7 @@ test('被 max_tokens 截断时不许"默默什么都不干"，要报错说清原
   try {
     const client = {
       role: 'implementer' as const,
-      model: 'gpt-6.1-sol',
+      model: 'gw-model-1',
       mock: false,
       async chat() {
         // 典型的截断：没有内容、没有工具调用、finish_reason=length

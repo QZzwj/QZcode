@@ -51,7 +51,7 @@ const CHAT_PAGE = `<!doctype html>
 
       <div class="composer">
         <div class="composer-box">
-          <textarea id="input" rows="1" placeholder="描述你想完成的事…"></textarea>
+          <textarea id="input" rows="1" placeholder="描述你想完成的事…（可以用 @src/utils.ts 附上文件原文）"></textarea>
           <div class="composer-bar">
             <button id="provider" class="chip" type="button" title="切换 AI 供应商">
               <span class="dot"></span><span id="provider-label">模型</span>
@@ -68,6 +68,10 @@ const CHAT_PAGE = `<!doctype html>
         </div>
 
         <div class="composer-foot">
+          <label class="toggle" id="plan-toggle">
+            <input type="checkbox" id="plan-first" />
+            <span>先看任务书</span>
+          </label>
           <label class="toggle" id="git-toggle" hidden>
             <input type="checkbox" id="git-auto" />
             <span>每次改动自动 git 提交</span>

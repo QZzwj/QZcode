@@ -74,7 +74,7 @@ function stub({ dropAfter, snapshot }) {
       postMessage(message) {
         if (message.type !== 'ready') return;
         setTimeout(() => {
-          window.postMessage({ type: 'init', url: 'http://127.0.0.1:60608', providers: { providers: [], current: { provider: 'hhd', model: 'x', mock: false } } }, '*');
+          window.postMessage({ type: 'init', url: 'http://127.0.0.1:60608', providers: { providers: [], current: { provider: 'gatewaya', model: 'x', mock: false } } }, '*');
           window.__QZ_READY__();
         }, 60);
       },

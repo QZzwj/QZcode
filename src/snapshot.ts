@@ -123,11 +123,15 @@ export class SnapshotStore {
 export function restoreFromIndex(
   workspace: string,
   index: SnapshotIndex,
+  /** 只回滚这些路径（相对工作区）；不传 = 全部回滚。 */
+  only?: string[],
 ): { restored: string[]; deleted: string[]; failed: { path: string; error: string }[] } {
   const restored: string[] = []
   const deleted: string[] = []
   const failed: { path: string; error: string }[] = []
+  const wanted = only && only.length > 0 ? new Set(only.map((item) => item.split('\\').join('/'))) : null
   for (const entry of index.entries) {
+    if (wanted && !wanted.has(entry.path)) continue
     const abs = join(workspace, entry.path)
     try {
       if (entry.file === null) {

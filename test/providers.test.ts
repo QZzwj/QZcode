@@ -256,32 +256,32 @@ test('换供应商不会复用上一家的 key，切回来还能取回', () => {
   try {
     const config = configWithFile(dir)
 
-    // 先用 hhd 这家，存一个 key
-    applyRole(config, { role: 'planner', provider: 'hhd', baseUrl: 'https://hhd.example.com/v1', apiKey: 'sk-hhd-1234567890' })
-    assert.equal(config.roles.planner.apiKey, 'sk-hhd-1234567890')
-    assert.equal(config.roles.planner.keyHistory.hhd, 'sk-hhd-1234567890')
+    // 先用 gatewaya 这家，存一个 key
+    applyRole(config, { role: 'planner', provider: 'gatewaya', baseUrl: 'https://gatewaya.example.com/v1', apiKey: 'sk-demo-1234567890' })
+    assert.equal(config.roles.planner.apiKey, 'sk-demo-1234567890')
+    assert.equal(config.roles.planner.keyHistory.gatewaya, 'sk-demo-1234567890')
 
-    // 换到 ruoli（另一个自定义供应商）→ 必须清空，不能把 hhd 的 key 拿去用
-    const switched = applyRole(config, { role: 'planner', provider: 'ruoli', baseUrl: 'https://ruoli.dev/v1' })
+    // 换到 gatewayb（另一个自定义供应商）→ 必须清空，不能把 gatewaya 的 key 拿去用
+    const switched = applyRole(config, { role: 'planner', provider: 'gatewayb', baseUrl: 'https://gateway.example.com/v1' })
     assert.equal(config.roles.planner.apiKey, '', '不能复用上一家的 key')
     assert.match(switched.warnings.join(' '), /还没有这家的 key/)
     const detail = switched.state.roles.find((role) => role.role === 'planner')
     assert.equal(detail?.hasKeyForProvider, false)
-    assert.deepEqual(detail?.storedKeyProviders, ['hhd'], '面板要知道哪家存过 key')
+    assert.deepEqual(detail?.storedKeyProviders, ['gatewaya'], '面板要知道哪家存过 key')
 
-    // 给 ruoli 填 key
-    applyRole(config, { role: 'planner', provider: 'ruoli', baseUrl: 'https://ruoli.dev/v1', apiKey: 'sk-ruoli-abcdef' })
-    assert.equal(config.roles.planner.keyHistory.ruoli, 'sk-ruoli-abcdef')
+    // 给 gatewayb 填 key
+    applyRole(config, { role: 'planner', provider: 'gatewayb', baseUrl: 'https://gateway.example.com/v1', apiKey: 'sk-demo-abcdef' })
+    assert.equal(config.roles.planner.keyHistory.gatewayb, 'sk-demo-abcdef')
 
-    // 切回 hhd → 自动取回 hhd 的 key
-    applyRole(config, { role: 'planner', provider: 'hhd', baseUrl: 'https://hhd.example.com/v1' })
-    assert.equal(config.roles.planner.apiKey, 'sk-hhd-1234567890', '切回去要能取回原来的 key')
+    // 切回 gatewaya → 自动取回 gatewaya 的 key
+    applyRole(config, { role: 'planner', provider: 'gatewaya', baseUrl: 'https://gatewaya.example.com/v1' })
+    assert.equal(config.roles.planner.apiKey, 'sk-demo-1234567890', '切回去要能取回原来的 key')
 
     // key 落盘，重启后仍在
     const written = JSON.parse(readFileSync(config.path, 'utf8')) as {
       roles: Record<string, { keyHistory?: Record<string, string> }>
     }
-    assert.equal(written.roles.planner.keyHistory?.ruoli, 'sk-ruoli-abcdef')
+    assert.equal(written.roles.planner.keyHistory?.gatewayb, 'sk-demo-abcdef')
   } finally {
     removeDir(dir)
   }
