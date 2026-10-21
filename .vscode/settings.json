@@ -1,0 +1,10 @@
+{
+  // QZcode 扩展的本机设置（只在这个工作区生效，不动你的全局 settings.json）
+  // cliPath 故意留空：用扩展自带的后端。要在仓库里调后端，把它指回 src/cli.ts。
+  "qzcode.cliPath": "",
+  // 没有 API key 时先用脚本化模型看流程；配好 key 后改成 false
+  "qzcode.mock": true,
+  "qzcode.exec": true,
+  // 打开这个工作区就把本地服务拉起来（右侧栏会出现状态）
+  "qzcode.autoStart": true
+}

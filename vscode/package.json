@@ -1,0 +1,264 @@
+{
+  "name": "qzcode",
+  "displayName": "QZcode",
+  "description": "QZcode：三模型流水线（A 写提示词与验收标准 → B 实现 → C 只读核验）。自带已编译后端，装好即用：不需要克隆仓库、不需要构建、Node ≥ 18 即可。",
+  "version": "3.0.1",
+  "publisher": "qzcode",
+  "license": "MIT",
+  "author": "QZzwj",
+  "private": true,
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.101.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "qzcode",
+    "agent",
+    "llm",
+    "deepseek",
+    "code review",
+    "multi-model"
+  ],
+  "main": "./extension.cjs",
+  "activationEvents": [
+    "onView:qzcode.chat",
+    "onCommand:qzcode.newTask",
+    "onCommand:qzcode.openChat",
+    "onCommand:qzcode.openSettings",
+    "onCommand:qzcode.chooseProvider",
+    "onCommand:qzcode.runSelection",
+    "onCommand:qzcode.openConfig",
+    "onCommand:qzcode.diagnose",
+    "onCommand:qzcode.showLog",
+    "onCommand:qzcode.cancelRun",
+    "onCommand:qzcode.showDiff",
+    "onCommand:qzcode.rollback",
+    "onCommand:qzcode.doctor",
+    "onCommand:qzcode.restart",
+    "onCommand:qzcode.stopServer"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "secondarySidebar": [
+        {
+          "id": "qzcode",
+          "title": "QZcode",
+          "icon": "media/icon.png",
+          "when": "!qzcode.noSecondarySidebar"
+        }
+      ]
+    },
+    "views": {
+      "qzcode": [
+        {
+          "type": "webview",
+          "id": "qzcode.chat",
+          "name": "聊天"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "qzcode.newTask",
+        "title": "新建任务…",
+        "category": "QZcode",
+        "icon": "$(add)"
+      },
+      {
+        "command": "qzcode.openChat",
+        "title": "打开侧栏聊天",
+        "category": "QZcode",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "qzcode.openSettings",
+        "title": "设置（模型 / 技能）",
+        "category": "QZcode",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "qzcode.chooseProvider",
+        "title": "更换 AI 供应商…",
+        "category": "QZcode",
+        "icon": "$(arrow-swap)"
+      },
+      {
+        "command": "qzcode.runSelection",
+        "title": "用选中代码当目标…",
+        "category": "QZcode",
+        "icon": "$(run)"
+      },
+      {
+        "command": "qzcode.openConfig",
+        "title": "打开配置（插件在这里开关）",
+        "category": "QZcode",
+        "icon": "$(json)"
+      },
+      {
+        "command": "qzcode.diagnose",
+        "title": "诊断侧栏图标（为什么有两个）",
+        "category": "QZcode",
+        "icon": "$(question)"
+      },
+      {
+        "command": "qzcode.showLog",
+        "title": "显示日志",
+        "category": "QZcode",
+        "icon": "$(output)"
+      },
+      {
+        "command": "qzcode.cancelRun",
+        "title": "强制停止当前运行",
+        "category": "QZcode",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "qzcode.showDiff",
+        "title": "查看本次改动（diff）",
+        "category": "QZcode",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "qzcode.rollback",
+        "title": "回滚本次运行的文件改动",
+        "category": "QZcode",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "qzcode.doctor",
+        "title": "体检（环境自检）",
+        "category": "QZcode",
+        "icon": "$(pulse)"
+      },
+      {
+        "command": "qzcode.restart",
+        "title": "重启服务",
+        "category": "QZcode",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "qzcode.stopServer",
+        "title": "停止服务",
+        "category": "QZcode",
+        "icon": "$(debug-disconnect)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "qzcode.runSelection",
+          "group": "qzcode",
+          "when": "editorHasSelection"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "qzcode.newTask",
+          "group": "navigation@1",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.cancelRun",
+          "group": "navigation@2",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.openSettings",
+          "group": "navigation@3",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.doctor",
+          "group": "navigation@4",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.restart",
+          "group": "1_maintenance@1",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.stopServer",
+          "group": "1_maintenance@2",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.showLog",
+          "group": "1_maintenance@3",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.openConfig",
+          "group": "1_maintenance@4",
+          "when": "view == qzcode.chat"
+        },
+        {
+          "command": "qzcode.openChat",
+          "group": "1_maintenance@5",
+          "when": "view == qzcode.chat"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "QZcode",
+      "properties": {
+        "qzcode.cliPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "后端 `cli.ts` 的路径。**留空即可**：扩展自带后端（`backend/src/cli.ts`）。只有想用别处的开发版时才填。"
+        },
+        "qzcode.nodePath": {
+          "type": "string",
+          "default": "node",
+          "description": "用来跑 QZcode 的 node 可执行文件（需要 Node ≥ 22.19）。"
+        },
+        "qzcode.configFile": {
+          "type": "string",
+          "default": "",
+          "description": "qzcode.json 的路径。留空则用工作区里的 qzcode.json。"
+        },
+        "qzcode.mock": {
+          "type": "boolean",
+          "default": false,
+          "description": "用脚本化模型（不联网、不需要 API key），适合先把流程跑一遍。"
+        },
+        "qzcode.exec": {
+          "type": "boolean",
+          "default": true,
+          "description": "允许 B/C 执行 shell 命令（关掉等于 --no-exec）。"
+        },
+        "qzcode.rounds": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 10,
+          "description": "A→B→C 最大轮次。0 表示用配置文件里的值。"
+        },
+        "qzcode.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "扩展激活时就把本地服务拉起来（状态栏会显示状态）。"
+        },
+        "qzcode.log": {
+          "type": "boolean",
+          "default": false,
+          "description": "把 QZcode 的诊断日志写进 .qzcode/debug.log（等于 --debug）。"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "qzcode.cancelRun",
+        "key": "ctrl+alt+backspace",
+        "mac": "cmd+alt+backspace"
+      }
+    ]
+  },
+  "scripts": {
+    "check": "node --check extension.cjs && node --check lib.cjs"
+  }
+}

@@ -1,0 +1,8 @@
+*
+!extension.cjs
+!lib.cjs
+!pages.cjs
+!package.json
+!README.md
+!media/**
+!backend/**

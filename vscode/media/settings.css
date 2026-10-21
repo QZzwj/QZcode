@@ -1,0 +1,594 @@
+/* QZcode 设置面板：与侧栏共用同一套设计令牌（见 chat.css 的设计说明）。
+ * 规则来自 ui-ux-pro-max-zh：焦点环可见、触摸目标 ≥44、对比度 ≥4.5、
+ * 尊重 reduced-motion；角色色与侧栏一致，读起来是同一个产品。
+ */
+
+:root {
+  --qz-radius: 10px;
+  --qz-radius-sm: 7px;
+  --qz-radius-pill: 999px;
+  --qz-fast: 140ms;
+
+  --qz-fg: var(--vscode-foreground, #d7dae0);
+  --qz-muted: var(--vscode-descriptionForeground, #9ba3ae);
+  --qz-border: var(--vscode-panel-border, rgba(140, 148, 160, 0.28));
+  --qz-border-soft: var(--vscode-widget-border, rgba(140, 148, 160, 0.16));
+  --qz-surface: var(--vscode-input-background, rgba(140, 148, 160, 0.1));
+  --qz-surface-2: var(--vscode-editorWidget-background, rgba(140, 148, 160, 0.06));
+  --qz-accent: var(--vscode-focusBorder, #5aa2f7);
+  --qz-accent-ink: #08121f;
+  --qz-ok: var(--vscode-testing-iconPassed, #4cc38a);
+  --qz-err: var(--vscode-errorForeground, #f2686a);
+  --qz-warn: var(--vscode-editorWarning-foreground, #d8a13a);
+
+  --qz-leader: #8b9cf5;
+  --qz-planner: #b98bf0;
+  --qz-implementer: #4fb3e8;
+  --qz-verifier: #43c295;
+
+  --qz-mono: var(--vscode-editor-font-family, ui-monospace, "Cascadia Code", Consolas, monospace);
+
+  /* 和侧栏同一支笔：黄铜 = 唯一的强调色 */
+  --qz-brass: #d8a24a;
+  --qz-brass-ink: #1b1206;
+}
+
+body.vscode-light {
+  --qz-brass: #9c6b12;
+  --qz-brass-ink: #ffffff;
+  --qz-fg: var(--vscode-foreground, #1f2328);
+  --qz-muted: var(--vscode-descriptionForeground, #5c6470);
+  --qz-border: var(--vscode-panel-border, rgba(31, 35, 40, 0.18));
+  --qz-border-soft: var(--vscode-widget-border, rgba(31, 35, 40, 0.1));
+  --qz-surface: var(--vscode-input-background, rgba(31, 35, 40, 0.05));
+  --qz-surface-2: var(--vscode-editorWidget-background, rgba(31, 35, 40, 0.03));
+  --qz-accent: var(--vscode-focusBorder, #0b62c4);
+  --qz-accent-ink: #ffffff;
+  --qz-ok: var(--vscode-testing-iconPassed, #1a7f4b);
+  --qz-err: var(--vscode-errorForeground, #b42318);
+  --qz-leader: #5a63c9;
+  --qz-planner: #8b46c8;
+  --qz-implementer: #0b6e99;
+  --qz-verifier: #1a7f5a;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--vscode-font-family, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+  color: var(--qz-fg);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--qz-accent);
+  outline-offset: 2px;
+  border-radius: var(--qz-radius-sm);
+}
+
+/* ---------------------------------------------------------------- 顶栏 */
+
+.head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--qz-border-soft);
+  background: var(--vscode-editor-background, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.head h1 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--qz-radius-pill);
+  background: var(--qz-surface-2);
+  border: 1px solid var(--qz-border-soft);
+}
+
+.tab {
+  min-height: 26px;
+  padding: 2px 12px;
+  border: none;
+  border-radius: var(--qz-radius-pill);
+  background: transparent;
+  color: var(--qz-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--qz-fast) ease, color var(--qz-fast) ease;
+}
+
+.tab:hover { color: var(--qz-fg); }
+
+.tab.active {
+  background: var(--vscode-editor-background, rgba(140, 148, 160, 0.18));
+  color: var(--qz-fg);
+  font-weight: 600;
+}
+
+.spacer { flex: 1; }
+
+.dim {
+  color: var(--qz-muted);
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 42%;
+}
+
+main.panes { display: block; padding-bottom: 24px; }
+
+/* ---------------------------------------------------------------- 按钮 */
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+button.primary,
+button.ghost {
+  min-height: 28px;
+  padding: 4px 12px;
+  border-radius: var(--qz-radius-sm);
+  border: 1px solid var(--qz-border);
+  background: transparent;
+  color: var(--qz-fg);
+  font-size: 12px;
+  transition: background var(--qz-fast) ease, border-color var(--qz-fast) ease;
+}
+
+button.primary {
+  background: var(--qz-accent);
+  border-color: transparent;
+  color: var(--qz-accent-ink);
+  font-weight: 600;
+}
+
+button.primary:hover { filter: brightness(1.06); }
+button.ghost:hover { background: var(--qz-surface-2); border-color: var(--qz-accent); }
+button.primary:disabled,
+button.ghost:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------------------------------------------------------------- 角色卡片 */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 10px;
+  border: 1px solid var(--qz-border-soft);
+  border-radius: var(--qz-radius);
+  background: var(--qz-surface-2);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.card-role {
+  font-size: 11.5px;
+  color: var(--qz-muted);
+  margin-top: 1px;
+}
+
+/* 角色徽标：和侧栏同一套色 */
+.badge {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--qz-accent-ink);
+  background: var(--qz-muted);
+  flex: none;
+}
+
+.badge.badge-l, .badge.l { background: var(--qz-leader); }
+.badge.badge-a, .badge.a { background: var(--qz-planner); }
+.badge.badge-b, .badge.b { background: var(--qz-implementer); }
+.badge.badge-c, .badge.c { background: var(--qz-verifier); }
+
+/* ---------------------------------------------------------------- 字段 */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--qz-muted);
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--qz-muted);
+  line-height: 1.5;
+}
+
+.row-inline {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.row-inline > input,
+.row-inline > select { flex: 1; min-width: 0; }
+
+input[type='text'],
+input[type='password'],
+input[type='number'],
+select,
+textarea {
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: var(--qz-radius-sm);
+  border: 1px solid var(--qz-border);
+  background: var(--qz-surface);
+  color: var(--qz-fg);
+  font: inherit;
+  font-size: 12px;
+  transition: border-color var(--qz-fast) ease;
+}
+
+textarea { resize: vertical; line-height: 1.5; }
+
+input:hover,
+select:hover,
+textarea:hover { border-color: var(--qz-border); }
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--qz-accent);
+  box-shadow: 0 0 0 2px rgba(90, 162, 247, 0.22);
+}
+
+input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  min-height: 0;
+  accent-color: var(--qz-accent);
+  cursor: pointer;
+}
+
+details.advanced {
+  border-top: 1px dashed var(--qz-border-soft);
+  padding-top: 8px;
+}
+
+details.advanced > summary {
+  cursor: pointer;
+  font-size: 11.5px;
+  color: var(--qz-muted);
+  list-style: none;
+}
+
+details.advanced > summary::-webkit-details-marker { display: none; }
+details.advanced > summary::before { content: '›  '; }
+details.advanced[open] > summary::before { content: '⌄  '; }
+details.advanced > summary:hover { color: var(--qz-fg); }
+
+/* ---------------------------------------------------------------- 技能 */
+
+.skill-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--qz-border-soft);
+}
+
+.skill-list { display: flex; flex-direction: column; gap: 3px; }
+
+.skill-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.skill-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- 卡片状态 / 动作 */
+
+.card-status {
+  min-height: 16px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--qz-muted);
+}
+
+.card-status.ok { color: var(--qz-ok); }
+.card-status.err { color: var(--qz-err); }
+
+.actions-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+/* ---------------------------------------------------------------- 技能页 */
+
+.import-row {
+  display: flex;
+  gap: 6px;
+  padding: 14px 16px 6px;
+}
+
+.import-row input { flex: 1; min-width: 0; }
+
+#skills-hint { padding: 0 16px; margin: 0 0 8px; color: var(--qz-muted); font-size: 11.5px; }
+
+.skills-table {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.skills-table .skill-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) repeat(4, 60px) 52px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: var(--qz-radius-sm);
+  font-size: 12px;
+}
+
+.skills-table .skill-row:nth-child(odd) { background: var(--qz-surface-2); }
+
+.skills-table .skill-head {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--qz-muted);
+  background: transparent !important;
+  border-bottom: 1px solid var(--qz-border-soft);
+  border-radius: 0;
+}
+
+.skill-role { display: flex; justify-content: center; }
+.skill-role input[type='checkbox'] { width: auto; margin: 0; }
+.skill-actions { display: flex; justify-content: flex-end; }
+
+button.link {
+  background: none;
+  border: none;
+  padding: 3px 2px;
+  color: var(--qz-err);
+  font-size: 11.5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- 成本页 */
+
+.cost-summary { padding: 14px 16px 6px; }
+
+.cost-card {
+  border: 1px solid var(--qz-border-soft);
+  border-radius: var(--qz-radius);
+  background: var(--qz-surface-2);
+  padding: 12px 14px;
+}
+
+.cost-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.cost-today {
+  font-size: 20px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.cost-speed {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  margin-top: 6px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cost-speed-item { color: var(--qz-accent); }
+
+.cost-bar {
+  margin: 9px 0 4px;
+  height: 4px;
+  border-radius: var(--qz-radius-pill);
+  background: var(--qz-surface);
+  overflow: hidden;
+}
+
+.cost-fill {
+  height: 100%;
+  border-radius: var(--qz-radius-pill);
+  background: var(--qz-ok);
+}
+
+.cost-fill.over { background: var(--qz-err); }
+
+/* ---------------------------------------------------------------- 底栏 */
+
+.foot {
+  position: sticky;
+  bottom: 0;
+  padding: 6px 16px 8px;
+  font-size: 11.5px;
+  background: var(--vscode-editor-background, transparent);
+}
+
+.status { color: var(--qz-muted); }
+.status.ok { color: var(--qz-ok); }
+.status.err { color: var(--qz-err); }
+
+/* 触摸设备：命中区放大到 44（规则 CRITICAL） */
+@media (pointer: coarse) {
+  button.primary,
+  button.ghost,
+  .tab { min-height: 44px; }
+  input[type='text'],
+  input[type='password'],
+  input[type='number'],
+  select { min-height: 44px; font-size: 16px; }
+  input[type='checkbox'] { width: 20px; height: 20px; }
+  .skills-table .skill-row { padding: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* 分步骤速度表：每一步多快、花了多久 */
+.step-table {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.step-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 62px 62px 62px 40px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: var(--qz-radius-sm);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.step-row:nth-child(even) {
+  background: var(--qz-surface-2);
+}
+
+.step-head {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--qz-muted);
+  background: transparent;
+  border-bottom: 1px solid var(--qz-border-soft);
+  border-radius: 0;
+}
+
+.step-name {
+  color: var(--qz-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step-num {
+  text-align: right;
+  color: var(--qz-muted);
+}
+
+.step-best {
+  color: var(--qz-ok);
+  font-weight: 600;
+}
+
+.step-note {
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+@media (pointer: coarse) {
+  .step-row { padding: 8px 6px; font-size: 12px; }
+}
+
+/* C 卡片里的视觉模型设置 */
+.vision-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 9px 10px;
+  border: 1px dashed var(--qz-border);
+  border-radius: var(--qz-radius);
+  background: var(--qz-surface-2);
+}
+
+.vision-box .toggle {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vision-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vision-status {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--qz-muted);
+  align-self: center;
+}
+
+.vision-status.ok { color: var(--qz-ok); }
+.vision-status.err { color: var(--qz-err); }

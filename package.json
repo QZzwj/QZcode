@@ -1,0 +1,33 @@
+{
+  "name": "qzcode",
+  "version": "0.1.0",
+  "private": true,
+  "description": "QZcode：三模型编码流水线（A 出提示词与验收标准 → B 带工具实现 → C 只读核验），TUI + 浏览器 GUI + VS Code 扩展三个入口，插件化，零运行时依赖。",
+  "type": "module",
+  "license": "MIT",
+  "author": "QZzwj",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "bin": {
+    "qzcode": "src/cli.ts",
+    "trio": "src/cli.ts"
+  },
+  "scripts": {
+    "bundle:backend": "node vscode/bundle-backend.mjs",
+    "clean:ext": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-extensions.ps1",
+    "start": "node src/cli.ts",
+    "web": "node src/cli.ts web --no-open",
+    "demo": "node src/cli.ts --mock",
+    "run": "node src/cli.ts run",
+    "test": "node --test --test-isolation=none --test-timeout=30000 \"test/*.test.ts\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check": "npm run typecheck && npm test",
+    "ui:check": "node scripts/ui-check-chat.mjs && node scripts/ui-check-settings.mjs",
+    "ui:preview:chat": "node -e \"console.log(require('node:path').join(process.cwd(), 'scripts/preview/chat.html'))\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

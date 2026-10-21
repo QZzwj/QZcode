@@ -1,0 +1,12 @@
+{
+  // 不想装扩展时，按 F5 用「扩展开发宿主」直接跑 vscode/ 里的代码
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "QZcode extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/vscode"]
+    }
+  ]
+}
