@@ -2,7 +2,7 @@
   "name": "qzcode",
   "displayName": "QZcode",
   "description": "四角色接力把一句话目标做成改动：L 管全程 → A 写任务书 → B 带工具实现 → C 只读核验，不通过就退回重写。自带后端，装好即用：不需要克隆仓库、不需要构建。",
-  "version": "3.5.4",
+  "version": "3.5.6",
   "publisher": "qzcode",
   "license": "MIT",
   "author": "QZzwj",
