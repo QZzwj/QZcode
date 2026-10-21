@@ -11,7 +11,7 @@ B 看不到你的原话，只读 A 写的任务书；C 不信 B 的汇报，自�
 ### 1. 不联网先看一遍（不需要 key）
 
 ```bash
-git clone https://github.com/<you>/qzcode && cd qzcode
+git clone https://github.com/QZzwj/QZcode && cd QZcode
 node src/cli.ts --mock
 ```
 
@@ -50,6 +50,14 @@ code --install-extension qzcode.vsix --force
 
 轮次用完就以 `failed` 收尾，不会无限烧钱；`issues` 里出现 `blocker` 时，模型自己写 `pass: true` 也算不通过。
 
+## 编辑器里几个用得上的开关
+
+- **先看任务书**：勾上输入框旁的「先看任务书」再发目标，A 只出任务书就停；点「按这个做」继续，跳过 L 和 A 直接进 B（省掉这两步的 token）。
+- **`@文件`**：目标里写 `@src/utils.ts`，后端把文件内容附给 A；越界、不存在、二进制会给出原因，超长会截断。
+- **接着改**：上一轮的目标、结论和改动清单会带进下一轮，不用每次从零解释。
+- **改动可回滚**：动手前先存快照，跑完点「查看改动」「回滚某个文件」「全部回滚」，也可用命令面板的 `QZcode: 回滚本次运行的文件改动`；「查看本轮记录」打开 `.qzcode/runN.md`。
+- **预算硬闸**：`cost.dailyBudget` 按天记账（`.qzcode/cost.json`），花超了直接拒绝开新一轮；成本页有进度条。
+
 ## 配置
 
 `node src/cli.ts init` 生成的 `qzcode.json`（找不到配置就用内置默认值）：
@@ -72,6 +80,7 @@ code --install-extension qzcode.vsix --force
 - 预设：`deepseek` / `openai` / `openrouter` / `moonshot` / `zhipu` / `ollama` / `lmstudio`；填 `baseUrl` 就覆盖预设，**随便起个名字 + `baseUrl` 就是自定义网关**。
 - `${VAR}` 和 `${VAR:-缺省值}` 会展开；`localhost` 端点自动补占位 key。
 - 想省钱：`review.enabled: false` 少一次 A 复核调用，`leader.enabled: false` 不起分流。
+- 其它几块：`cost.dailyBudget`（每日预算，0 = 不限）、`git.autoCommit`（每轮结束自动提交改动）、`vision.*`（把截图交给视觉模型看，C 是纯文本模型时用得上）、`skills.*`（技能开关与导入）。
 
 ## 插件
 

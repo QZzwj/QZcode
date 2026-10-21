@@ -11,7 +11,7 @@ B never sees your prompt — only the brief A wrote. C ignores B's report and op
 ### 1. Watch the whole loop offline (no key needed)
 
 ```bash
-git clone https://github.com/<you>/qzcode && cd qzcode
+git clone https://github.com/QZzwj/QZcode && cd QZcode
 node src/cli.ts --mock
 ```
 
@@ -50,6 +50,14 @@ A QZcode icon shows up in the secondary sidebar → type a goal → Enter. The b
 
 When rounds run out the run ends as `failed` instead of spending forever. If `issues` contains a `blocker`, a model-written `pass: true` is still a fail.
 
+## Switches worth knowing (VS Code sidebar)
+
+- **Plan first** (「先看任务书」): tick it next to the input and send a goal — A stops after writing the brief; press 「按这个做」 and the run skips L and A straight into B (saving those two calls).
+- **`@file`**: write `@src/utils.ts` in the goal and the backend attaches that file for A; escapes, missing files and binaries are reported, long files are truncated.
+- **Follow-ups**: the previous goal, verdict and change list carry into the next round, so you do not re-explain from scratch.
+- **Rollback**: files are snapshotted before they change. After a run, use 「查看改动」 / 「回滚某个文件」 / 「全部回滚」, or the `QZcode: 回滚本次运行的文件改动` command; 「查看本轮记录」 opens `.qzcode/runN.md`.
+- **Budget gate**: `cost.dailyBudget` is tracked per day in `.qzcode/cost.json`; once it is spent, a new run is refused, and the cost page shows a progress bar.
+
 ## Configuration
 
 The `qzcode.json` that `node src/cli.ts init` writes (built-in defaults are used when no config is found):
@@ -72,6 +80,7 @@ The `qzcode.json` that `node src/cli.ts init` writes (built-in defaults are used
 - Presets: `deepseek` / `openai` / `openrouter` / `moonshot` / `zhipu` / `ollama` / `lmstudio`. A `baseUrl` overrides the preset, and **any other name plus a `baseUrl` is a custom gateway**.
 - `${VAR}` and `${VAR:-fallback}` expand; `localhost` endpoints get a placeholder key.
 - To spend less: `review.enabled: false` drops the A re-review call, `leader.enabled: false` drops the router.
+- Other blocks: `cost.dailyBudget` (daily cap, 0 = unlimited), `git.autoCommit` (commit after each round), `vision.*` (send screenshots to a vision model — useful when C is text-only), `skills.*` (enable or import skills).
 
 ## Plugins
 
