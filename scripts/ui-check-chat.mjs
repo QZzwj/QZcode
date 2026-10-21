@@ -234,7 +234,7 @@ const patchUi = await evaluate(`(() => {
       };
     })()`)
 check('文件改动以 diff 形式显示', patchUi.hasPatch === true && /index\.html/.test(patchUi.headText), patchUi.headText.slice(0, 40))
-check('diff 块能展开且有 +/− 配色', patchUi.expanded === true && /115,\s*201,\s*145/.test(patchUi.addColor ?? '') && /244,\s*135,\s*113/.test(patchUi.delColor ?? ''), JSON.stringify({ add: patchUi.addColor, del: patchUi.delColor }))
+check('diff 块能展开且有 +/− 配色', patchUi.expanded === true && /78,\s*201,\s*165/.test(patchUi.addColor ?? '') && /242,\s*112,\s*95/.test(patchUi.delColor ?? ''), JSON.stringify({ add: patchUi.addColor, del: patchUi.delColor }))
 check('diff 块不横向溢出', patchUi.noOverflow === true)
 check('输入框下面有 git 自动提交开关', patchUi.hasToggle === true)
 
