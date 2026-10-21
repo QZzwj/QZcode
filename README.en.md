@@ -2,6 +2,8 @@
 
 <p align="center"><img src="./assets/readme/hero.en.svg" width="100%" alt="QZcode: A writes the brief, B implements, C verifies read-only; a failed verdict sends the issues back to A"></p>
 
+<p align="center"><a href="https://github.com/QZzwj/QZcode/releases/latest/download/qzcode.vsix"><img src="https://img.shields.io/badge/VS_Code-Download_VSIX-007ACC?logo=visualstudiocode" alt="Download the VSIX and install QZcode" height="30"></a></p>
+
 **Three models, none of them allowed to grade its own work.**
 
 B never sees your prompt — only the brief A wrote. C ignores B's report and opens the files and runs the commands itself. One `blocker` from C and the round does not pass. The TUI, `qzcode run` and the VS Code sidebar all drive the same pipeline.
@@ -31,9 +33,13 @@ node src/cli.ts run "add parseDuration to src/utils.ts and cover it with tests"
 
 ### 3. Install it in your editor (the main entry point)
 
+No build required: grab [`qzcode.vsix` from the latest release](https://github.com/QZzwj/QZcode/releases/latest/download/qzcode.vsix), then `⋯` at the top right of the Extensions panel → **Install from VSIX**. To build one from source:
+
 ```bash
 npm run bundle:backend
-node node_modules/@vscode/vsce/vsce package --allow-missing-repository --no-dependencies --skip-license -o qzcode.vsix --cwd vscode
+cd vscode
+node ../node_modules/@vscode/vsce/vsce package --allow-missing-repository --no-dependencies --skip-license -o ../qzcode.vsix
+cd ..
 code --install-extension qzcode.vsix --force
 ```
 

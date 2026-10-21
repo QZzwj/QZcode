@@ -13,7 +13,9 @@
 ```powershell
 # 1) 打包（把 src/ 一起打进去，约 160 KB）
 npm run bundle:backend
-node node_modules\@vscode\vsce\vsce package --allow-missing-repository --no-dependencies --skip-license -o qzcode.vsix --cwd vscode
+cd vscode
+node ../node_modules/@vscode/vsce/vsce package --allow-missing-repository --no-dependencies --skip-license -o ../qzcode.vsix
+cd ..
 
 # 2) 安装
 code --install-extension qzcode.vsix --force

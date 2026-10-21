@@ -2,6 +2,8 @@
 
 <p align="center"><img src="./assets/readme/hero.zh.svg" width="100%" alt="QZcode：A 写任务书 → B 实现 → C 只读核验，不通过就把意见带回 A"></p>
 
+<p align="center"><a href="https://github.com/QZzwj/QZcode/releases/latest/download/qzcode.vsix"><img src="https://img.shields.io/badge/VS_Code-%E4%B8%8B%E8%BD%BD_VSIX_%E5%AE%89%E8%A3%85-007ACC?logo=visualstudiocode" alt="下载 VSIX 安装 QZcode" height="30"></a></p>
+
 **三个模型分工，谁都不能自己说自己对。**
 
 B 看不到你的原话，只读 A 写的任务书；C 不信 B 的汇报，自己开文件、自己跑命令；只要 C 记一条 `blocker`，这一轮就不算通过。TUI、`run` 和 VS Code 侧栏三个入口，用的是同一条流水线。
@@ -31,9 +33,13 @@ node src/cli.ts run "给 src/utils.ts 加 parseDuration 并补测试"
 
 ### 3. 装进编辑器（主入口）
 
+不想自己打包，就直接下 [Release 里的 `qzcode.vsix`](https://github.com/QZzwj/QZcode/releases/latest/download/qzcode.vsix)，在扩展面板右上 `⋯` → **从 VSIX 安装**。要从源码打一份：
+
 ```bash
 npm run bundle:backend
-node node_modules/@vscode/vsce/vsce package --allow-missing-repository --no-dependencies --skip-license -o qzcode.vsix --cwd vscode
+cd vscode
+node ../node_modules/@vscode/vsce/vsce package --allow-missing-repository --no-dependencies --skip-license -o ../qzcode.vsix
+cd ..
 code --install-extension qzcode.vsix --force
 ```
 
