@@ -92,7 +92,7 @@ test('the manifest is branded QZcode and every contributed id is namespaced', ()
   assert.ok(manifest.activationEvents.includes('onView:qzcode.chat'), 'view must activate on open')
 
   const commandIds = manifest.contributes.commands.map((command) => command.command)
-  assert.equal(commandIds.length, 14)
+  assert.equal(commandIds.length, 15)
   for (const id of commandIds) {
     assert.match(id, /^qzcode\./, `command must be namespaced: ${id}`)
   }
