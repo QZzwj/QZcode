@@ -24,7 +24,9 @@
   --qz-ok: var(--vscode-testing-iconPassed, #73c991);
   --qz-err: var(--vscode-errorForeground, #f48771);
   --qz-mono: var(--vscode-editor-font-family, ui-monospace, Consolas, monospace);
-  --qz-radius: 2px;
+  --qz-radius: 6px;
+  --qz-radius-sm: 4px;
+  --qz-radius-pill: 999px;
 }
 
 * { box-sizing: border-box; }
@@ -66,7 +68,7 @@ body {
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px 10px 12px;
+  padding: 10px 11px 14px;
 }
 
 /* ------------------------------------------------------------- 角色栏 */
@@ -176,14 +178,14 @@ body {
 /* ------------------------------------------------------------------ 消息 */
 
 .msg {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   min-width: 0;
 }
 
 /* 你说的话：和编辑器输入框同一个底色，不加边框、不加尾巴 */
 .msg.user .text {
-  padding: 6px 8px;
-  border-radius: var(--qz-radius);
+  padding: 7px 10px;
+  border-radius: var(--qz-radius) var(--qz-radius) var(--qz-radius-sm) var(--qz-radius);
   background: var(--qz-input-bg);
   font-size: 13px;
   white-space: pre-wrap;
@@ -241,8 +243,8 @@ body {
 .text li { margin: 1px 0; }
 
 .text code {
-  padding: 0 3px;
-  border-radius: var(--qz-radius);
+  padding: 1px 4px;
+  border-radius: var(--qz-radius-sm);
   background: var(--qz-input-bg);
   font-family: var(--qz-mono);
   font-size: 12px;
@@ -250,9 +252,9 @@ body {
 
 .text pre {
   margin: 6px 0;
-  padding: 6px 8px;
+  padding: 7px 9px;
   border: 1px solid var(--qz-line-soft);
-  border-radius: var(--qz-radius);
+  border-radius: var(--qz-radius-sm);
   background: var(--qz-input-bg);
   overflow-x: auto;
 }
@@ -307,9 +309,9 @@ body {
 }
 
 .tag {
-  padding: 0 5px;
+  padding: 1px 7px;
   border: 1px solid var(--qz-line);
-  border-radius: var(--qz-radius);
+  border-radius: var(--qz-radius-pill);
   font-size: 11px;
   color: var(--qz-muted);
 }
@@ -338,10 +340,10 @@ body {
 .patch-removed { color: var(--qz-err); }
 
 .patch-body {
-  margin: 3px 0 0;
-  padding: 6px 8px;
+  margin: 4px 0 0;
+  padding: 7px 9px;
   border: 1px solid var(--qz-line-soft);
-  border-radius: var(--qz-radius);
+  border-radius: var(--qz-radius-sm);
   background: var(--qz-input-bg);
   font-family: var(--qz-mono);
   font-size: 11px;
@@ -421,9 +423,9 @@ body {
   align-items: center;
   gap: 5px;
   max-width: 64%;
-  padding: 1px 6px;
+  padding: 2px 8px;
   border: 1px solid transparent;
-  border-radius: var(--qz-radius);
+  border-radius: var(--qz-radius-pill);
   background: none;
   color: var(--qz-muted);
   font: inherit;
@@ -452,7 +454,7 @@ body {
   height: 30px;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: var(--qz-radius);
+  border-radius: var(--qz-radius-sm);
   background: none;
   color: var(--qz-muted);
   cursor: pointer;

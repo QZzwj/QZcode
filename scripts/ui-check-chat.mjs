@@ -192,6 +192,24 @@ const layout = await evaluate(`(() => {
   return out;
 })()`)
 
+const radiusCheck = await evaluate(`(() => {
+  const radius = (sel) => {
+    const node = document.querySelector(sel);
+    if (!node) return null;
+    return parseFloat(getComputedStyle(node).borderTopLeftRadius) || 0;
+  };
+  return {
+    user: radius('.msg.user .text'),
+    composer: radius('.composer-box'),
+    patch: radius('.patch-body'),
+    code: radius('.text pre'),
+    send: radius('.send'),
+    tag: radius('.tag'),
+  };
+})()`)
+const radiusValues = Object.values(radiusCheck).filter((value) => typeof value === 'number')
+check('圆角至少 4px（别太硬朗）', radiusValues.length >= 4 && Math.min(...radiusValues) >= 4, JSON.stringify(radiusCheck))
+
 check('没有横向溢出', layout.overflowX === false)
 check('消息都在会话区内', layout.issues.length === 0, layout.issues.join('; ') || 'ok')
 check('工具行数量正确且不溢出', layout.tools >= 6 && layout.toolIssues === 0, `tools=${layout.tools}`)

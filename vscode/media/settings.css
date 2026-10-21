@@ -4,8 +4,8 @@
  */
 
 :root {
-  --qz-radius: 4px;
-  --qz-radius-sm: 3px;
+  --qz-radius: 6px;
+  --qz-radius-sm: 4px;
   --qz-radius-pill: 999px;
   --qz-fast: 140ms;
 
