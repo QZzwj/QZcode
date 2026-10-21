@@ -17,6 +17,7 @@ import { CostLedger, formatMoney } from '../cost.ts'
 import { commitPaths, headShort, isGitRepo } from '../git.ts'
 import { createStepMeter, stepSpeeds, type StepStat } from '../steps.ts'
 import { describeImage } from '../vision.ts'
+import { writeRunLog } from '../runlog.ts'
 import { formatDoctor, runDoctor } from '../doctor.ts'
 import { diffSnapshot, listSnapshots, loadSnapshot, restoreFromIndex, SnapshotStore } from '../snapshot.ts'
 import { importSkill, listSkills } from '../skills.ts'
@@ -391,6 +392,24 @@ export async function createWebServer(options: WebServerOptions): Promise<WebSer
           )
         }
         run.status = result.ok ? 'passed' : 'failed'
+        // 每轮留一份记录：<工作区>/.qzcode/runN.md（L/A/B/C 各自干了什么）
+        {
+          const logged = writeRunLog(toolRuntime.workspace, {
+            runId: run.id,
+            goal,
+            startedAt: run.createdAt,
+            status: run.status,
+            events: run.events,
+            steps: run.steps,
+            touched: run.snapshot?.entries.length ?? 0,
+          })
+          if (logged.ok) {
+            push(run, { t: 'note', level: 'info', message: `本轮记录已写入 .qzcode/run${logged.index}.md` })
+            logger.info(`[runlog] ${logged.path}`)
+          } else {
+            push(run, { t: 'note', level: 'warn', message: `记录文件没写成：${logged.error}` })
+          }
+        }
         // 自动 git 提交：只提交这次真改过的文件（路径来自快照，绝不 add -A）
         if (config.git.autoCommit) {
           try {
