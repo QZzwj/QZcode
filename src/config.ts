@@ -7,7 +7,7 @@ export type RoleName = 'leader' | 'planner' | 'implementer' | 'verifier'
 export const ROLE_NAMES: readonly RoleName[] = ['leader', 'planner', 'implementer', 'verifier']
 
 export const ROLE_TITLES: Record<RoleName, string> = {
-  leader: 'L · 分流（判断这轮怎么走 · 省 token）',
+  leader: 'L · 管全程（决定这轮怎么走 · 省 token）',
   planner: 'A · 规划 (prompt + guidance)',
   implementer: 'B · 实现 (tools)',
   verifier: 'C · 核验 (read-only + tests)',
