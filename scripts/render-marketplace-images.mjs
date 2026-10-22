@@ -23,7 +23,7 @@ if (!chrome) {
 
 const dir = join('vscode', 'media', 'readme')
 const svgs = readdirSync(dir).filter((name) => name.endsWith('.svg'))
-console.log(`渲染 ${svgs.length} 个 SVG → PNG`)
+console.log(`渲染 ${svgs.length} 个 SVG → PNG（2x，高 DPI 不糊）`)
 
 for (const name of svgs) {
   const svg = resolve(join(dir, name))
@@ -38,7 +38,7 @@ for (const name of svgs) {
       '--disable-gpu',
       '--no-first-run',
       '--hide-scrollbars',
-      '--force-device-scale-factor=1',
+      '--force-device-scale-factor=2',
       `--window-size=${width},${height}`,
       `--screenshot=${png}`,
       `file:///${svg.replace(/\\/g, '/')}`,
@@ -46,7 +46,7 @@ for (const name of svgs) {
     { stdio: 'ignore' },
   )
   const size = readFileSync(png).length
-  console.log(`  ${name} → ${name.replace(/\.svg$/, '.png')}  ${width}×${height} · ${Math.round(size / 1024)} KB`)
+  console.log(`  ${name} → ${name.replace(/\.svg$/, '.png')}  ${width}×${height} @2x · ${Math.round(size / 1024)} KB`)
 }
 
 // 引用改成 PNG
