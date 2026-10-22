@@ -24,7 +24,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check": "npm run typecheck && npm test",
     "ui:check": "node scripts/ui-check-chat.mjs && node scripts/ui-check-settings.mjs && node scripts/ui-check-reconnect.mjs",
-    "ui:preview:chat": "node -e \"console.log(require('node:path').join(process.cwd(), 'scripts/preview/chat.html'))\""
+    "repo:clean": "node scripts/cleanup-repo.mjs",
+    "repo:unused": "node scripts/find-unused.mjs",
+    "release": "node scripts/make-release.mjs",
+    "release:verify": "node scripts/verify-release.mjs",
+    "smoke:installed": "node scripts/probe-installed.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

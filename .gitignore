@@ -1,6 +1,8 @@
 # 依赖与缓存
 node_modules/
 .npm-cache/
+# 本地配置里有真实 apiKey：绝不进仓库（模板用 qzcode.example.json）
+qzcode.json
 .vscode-test/
 
 # 构建产物（npm run bundle:backend 会重新生成）

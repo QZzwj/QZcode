@@ -15,41 +15,47 @@ L 管全程（决定怎么走、派活）→ A 写任务书 → B 实现 → A �
 ## 目录
 
 ```
-src/                 后端（Node 直接跑 .ts，无需编译；扩展里跑的是打包好的 dist/cli.js）
+src/                 后端（Node 直接跑 .ts；扩展里跑的是打包好的 dist/cli.js）
   kernel.ts          插件/工具/命令的装配
   agent.ts           单个角色的工具循环
   llm.ts             OpenAI 兼容 SSE 客户端（含截断重试、心跳）
   roles.ts           L/A/B/C 四个角色的提示词与步骤
-  pipeline.ts        流水线：路由 → 计划 → 实现 → 复核 → 核验
+  pipeline.ts        流水线：分流 → 计划 → 实现 → 复核 → 核验
   tools.ts           read/write/edit/grep/find/ls/bash/browser
-  browser.ts         CDP 驱动的真浏览器（截图、点按、按住蓄力）
+  browser.ts         CDP 驱动的真浏览器（截图、点按）
   snapshot.ts        改动前快照 / 回滚 / diff
   git.ts             自动提交（只提交这次改过的路径，必要时 git init）
   runlog.ts          每轮写 .qzcode/runN.md
-  cost.ts            记账与按步骤的速度统计
-  steps.ts           每步的模型耗时 / 输出 token 计量
   reference.ts       @文件 引用解析
   vision.ts          视觉模型（给纯文本的 C 当"第二双眼睛"）
-  doctor.ts          体检（15 项）
+  cost.ts / steps.ts 记账与按步骤的速度统计
+  doctor.ts          体检（9 项）
   config.ts          配置归一化与默认值
   web/server.ts      HTTP + SSE（侧栏直连它）
+  tui/               命令行界面（npm start）
 
 vscode/              扩展
-  extension.cjs      激活、命令、订阅、后端进程管理
-  lib.cjs            页面 HTML、cli 路径解析、csp
+  extension.cjs      激活、命令、订阅、后端进程管理（含运行时解析）
+  lib.cjs            页面 HTML、运行时/cli 路径解析、csp
   pages.cjs          两个页面的 HTML 模板（安装包里没有 .html 文件）
+  bundle-backend.mjs 把 src/ 打成 backend/dist/cli.js
   media/chat.*       侧栏聊天（js/css）
-  media/settings.*   设置面板（模型 / 技能 / 成本）
-  backend/           打包进 vsix 的后端（dist + prompts + skills + plugins）
+  media/settings.*   设置面板
+  media/readme/      详情页用的示意图（svg 源 + png）
+  backend/           打进 vsix 的后端
 
-test/                201 条测试（node --test）
-scripts/             打包、清理、UI 验收、预览、探针
-docs/                架构说明
-snippets/            临时补丁脚本（gitignore）
-vsix-history/        每个版本的安装包存档
+test/                206 条测试（node --test）
+docs/                architecture.md（架构）、plugins.md、skills.md
+plugins/             两个示例插件（不随安装包分发）
+scripts/             打包、清理、UI 验收、发布
+  ui-check-*.mjs     三个真实渲染的 UI 验收（侧栏 / 设置 / 断线恢复）
+  preview-page.mjs   给 UI 验收生成页面
+  probe-installed.mjs  装好之后的冒烟测试（用 VS Code 自带运行时真跑一轮）
+  probe-no-node.mjs    证明 PATH 里没有 node 也能跑
+  probe-features.mjs   端到端验收（计划模式 / 预算闸 / @文件 / 按文件回滚）
+  make-release.mjs / verify-release.mjs  发 GitHub Release 与核对
+  clean-extensions.ps1 / cleanup-repo.mjs  清理
 ```
-
----
 
 ## 开发
 
