@@ -28,7 +28,8 @@
     "repo:unused": "node scripts/find-unused.mjs",
     "release": "node scripts/make-release.mjs",
     "release:verify": "node scripts/verify-release.mjs",
-    "smoke:installed": "node scripts/probe-installed.mjs"
+    "smoke:installed": "node scripts/probe-installed.mjs",
+    "scan:secrets": "node scripts/scan-secrets.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
