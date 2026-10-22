@@ -1,8 +1,8 @@
 {
   "name": "qzcode",
   "displayName": "QZcode",
-  "description": "四角色接力把一句话目标做成改动：L 管全程 → A 写任务书 → B 带工具实现 → C 只读核验，不通过就退回 A 重写任务书，最多 3 轮。自带后端，装好即用。",
-  "version": "3.6.0",
+  "description": "四角色接力做代码改动：L 管全程 → A 写任务书 → B 带工具实现 → C 只读核验，不通过退回 A 重写，最多 3 轮。自带后端，不需要装 Node；填一次模型 key 即可在侧栏运行。",
+  "version": "3.6.1",
   "publisher": "qzcode",
   "license": "MIT",
   "author": "QZzwj",

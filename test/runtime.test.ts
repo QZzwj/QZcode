@@ -2,7 +2,18 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import test from 'node:test'
-import lib from '../vscode/lib.cjs'
+import { createRequire } from 'node:module'
+
+const requireCjs = createRequire(import.meta.url)
+interface ResolvedNode {
+  command: string
+  env: Record<string, string>
+  source: 'setting' | 'electron' | 'path'
+  describe: string
+}
+const lib = requireCjs('../vscode/lib.cjs') as {
+  resolveNode: (options?: { nodePath?: string; execPath?: string; isElectron?: boolean }) => ResolvedNode
+}
 
 const repoRoot = join(import.meta.dirname, '..')
 

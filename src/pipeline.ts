@@ -198,7 +198,10 @@ export async function runPipeline(options: PipelineOptions): Promise<RunResult> 
 
   // ---------------------------------------------------------------- L 分流
   let route: RouteDecision | undefined
-  if (config.leader.enabled) {
+  if (config.leader.enabled && options.presetPlan) {
+    // 任务书是用户确认过的：怎么走已经定了，不用再问 L（省一次调用）
+    reporter.note('沿用你确认过的任务书，跳过 L 的分流。', 'info')
+  } else if (config.leader.enabled) {
     reporter.phase('route', 1)
     const routed = await leaderStep(
       { client: clients.leader, toolbox, toolRuntime, config, signal },

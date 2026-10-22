@@ -98,6 +98,10 @@ test('计划模式：拿任务书继续执行时跳过 A', async () => {
     })
 
     assert.equal(ran.planned, undefined, '第二轮不是计划模式')
+    assert.ok(
+      second.notes.some((note) => note.includes('跳过 L 的分流')),
+      '预设任务书时不该再花 L 的 token',
+    )
     assert.ok(second.notes.some((note) => note.includes('沿用你确认过的任务书')), '要提示跳过了 A')
     // 直接进 B：plan 阶段之后紧接着 implement
     const implementIndex = second.phases.indexOf('implement')
