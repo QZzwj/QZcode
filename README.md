@@ -18,10 +18,10 @@
 ## 一眼看明白它在干什么
 
 <p align="center">
-  <img src="./assets/readme/vscode-sidebar.png" width="100%" alt="QZcode 侧栏：A 的结论、B 的工具调用与文件改动、居中的通过结论、输入框和两个开关。">
+  <img src="./assets/readme/sidebar.svg" width="100%" alt="QZcode 侧栏：A 的结论、B 的工具调用与文件改动、居中的通过结论、输入框和两个开关。">
 </p>
 
-真实截图，不是设计稿。从上往下：模型输出（markdown 渲染）、工具调用压成一行（`write OK 96ms index.html`）、文件改动（`+42 −0`，点开看 diff）、结论单独居中、输入框、底下两个开关（先看任务书 / 每次改动自动 git 提交）。
+侧栏的样子。从上往下：模型输出（markdown 渲染）、工具调用压成一行（`write OK 96ms index.html`）、文件改动（`+42 −0`，点开看 diff）、结论单独居中、输入框、底下两个开关（先看任务书 / 每次改动自动 git 提交）。
 
 ## 为什么不是"又一个 AI 改代码"
 

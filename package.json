@@ -31,7 +31,8 @@
     "smoke:installed": "node scripts/probe-installed.mjs",
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "svg:check": "node scripts/measure-svg.mjs",
-    "readme:check": "node scripts/measure-svg.mjs && node scripts/audit-readme.mjs"
+    "readme:check": "node scripts/measure-svg.mjs && node scripts/audit-readme.mjs",
+    "images:marketplace": "node scripts/render-marketplace-images.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

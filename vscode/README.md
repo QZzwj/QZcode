@@ -27,6 +27,8 @@ code --install-extension qzcode.vsix --force
 
 ---
 
+![四角色分工](media/readme/roles.png)
+
 ## 第一次用：先看流程，再填 key
 
 1. `Ctrl+Shift+P` → `QZcode: 设置（模型 / 技能）`

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="qz-roles-title qz-roles-desc">
+  <title id="qz-roles-title">QZcode 四角色分工</title>
+  <desc id="qz-roles-desc">L 判断这一轮怎么走；A 写任务书并在实现跑偏时退回重做；B 读改文件、跑命令、开浏览器验证；C 只读核验。C 不通过则退回 A 重写任务书，最多 3 轮。</desc>
+
+  <rect width="1200" height="380" rx="24" fill="#0b111f"/>
+  <rect x="1" y="1" width="1198" height="378" rx="23" fill="none" stroke="#27354d"/>
+
+  <!-- L -->
+  <g id="role-leader">
+    <rect x="55" y="56" width="250" height="188" rx="16" fill="#111b2c" stroke="#2b3d59"/>
+    <circle cx="91" cy="96" r="19" fill="#22375c" stroke="#67a7ff" stroke-width="2"/>
+    <text x="91" y="103" font-family="Consolas, Menlo, monospace" font-size="20" font-weight="700" fill="#bcd8ff" text-anchor="middle">L</text>
+    <text x="122" y="104" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600" fill="#eef4ff">管全程</text>
+    <text x="75" y="150" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">决定这一轮怎么走：</text>
+    <text x="75" y="178" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">走流水线 / 直接回答 / 追问</text>
+    <text x="75" y="214" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="18" fill="#7f93b0">省一次全流程的 token</text>
+  </g>
+
+  <!-- 箭头 L → A -->
+  <g id="arrow-la">
+    <line x1="309" y1="150" x2="331" y2="150" stroke="#3f5876" stroke-width="2"/>
+    <path d="M331 150l-8 -5v10z" fill="#3f5876"/>
+  </g>
+
+  <!-- A -->
+  <g id="role-planner">
+    <rect x="335" y="56" width="250" height="188" rx="16" fill="#111b2c" stroke="#2b3d59"/>
+    <circle cx="371" cy="96" r="19" fill="#2b2440" stroke="#b48ef0" stroke-width="2"/>
+    <text x="371" y="103" font-family="Consolas, Menlo, monospace" font-size="20" font-weight="700" fill="#dcc9ff" text-anchor="middle">A</text>
+    <text x="402" y="104" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600" fill="#eef4ff">写任务书</text>
+    <text x="355" y="150" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">给 B 的提示词 +</text>
+    <text x="355" y="178" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">能核验的验收标准</text>
+    <text x="355" y="214" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="18" fill="#7f93b0">也负责复核 B 的产出</text>
+  </g>
+
+  <!-- 箭头 A → B -->
+  <g id="arrow-ab">
+    <line x1="589" y1="150" x2="611" y2="150" stroke="#3f5876" stroke-width="2"/>
+    <path d="M611 150l-8 -5v10z" fill="#3f5876"/>
+  </g>
+
+  <!-- B -->
+  <g id="role-implementer">
+    <rect x="615" y="56" width="250" height="188" rx="16" fill="#111b2c" stroke="#2b3d59"/>
+    <circle cx="651" cy="96" r="19" fill="#16362f" stroke="#56cea1" stroke-width="2"/>
+    <text x="651" y="103" font-family="Consolas, Menlo, monospace" font-size="20" font-weight="700" fill="#a8e8cb" text-anchor="middle">B</text>
+    <text x="682" y="104" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600" fill="#eef4ff">动手实现</text>
+    <text x="635" y="150" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">读 / 写 / 改文件，</text>
+    <text x="635" y="178" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">跑命令，开浏览器验证</text>
+    <text x="635" y="214" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="18" fill="#7f93b0">改动前先存快照，可回滚</text>
+  </g>
+
+  <!-- 箭头 B → C -->
+  <g id="arrow-bc">
+    <line x1="869" y1="150" x2="891" y2="150" stroke="#3f5876" stroke-width="2"/>
+    <path d="M891 150l-8 -5v10z" fill="#3f5876"/>
+  </g>
+
+  <!-- C -->
+  <g id="role-verifier">
+    <rect x="895" y="56" width="250" height="188" rx="16" fill="#111b2c" stroke="#2b3d59"/>
+    <circle cx="931" cy="96" r="19" fill="#3a3020" stroke="#e8b45c" stroke-width="2"/>
+    <text x="931" y="103" font-family="Consolas, Menlo, monospace" font-size="20" font-weight="700" fill="#f5d9a3" text-anchor="middle">C</text>
+    <text x="962" y="104" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600" fill="#eef4ff">只读核验</text>
+    <text x="915" y="150" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">跑测试、看截图，</text>
+    <text x="915" y="178" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#b7c7de">逐条对验收标准</text>
+    <text x="915" y="214" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="18" fill="#7f93b0">不能改文件，只能给结论</text>
+  </g>
+
+  <!-- 退回路径 C → A -->
+  <g id="return-path">
+    <path d="M1020 246v52H470v-52" fill="none" stroke="#e8b45c" stroke-width="2" stroke-dasharray="7 6"/>
+    <path d="M470 246l-6 10h12z" fill="#e8b45c"/>
+    <rect x="556" y="276" width="378" height="40" rx="20" fill="#1b1f2c" stroke="#4a4230"/>
+    <text x="745" y="303" font-family="-apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif" font-size="19" fill="#f0d29a" text-anchor="middle">不通过 → 退回 A 重写任务书，最多 3 轮</text>
+  </g>
+</svg>
