@@ -44,6 +44,8 @@ $obsolete = Join-Path $root '.obsolete'
 if (-not $DryRun) {
   if ($locked.Count -gt 0) {
     $map = @{}
+    # 保命检查：要保留的那个版本永远不能进 .obsolete（否则下次启动 VS Code 会删掉它）
+    if ($name -eq $keep.Name) { Write-Host "  ⚠ $name 是要保留的版本，不标记为待删除"; continue }
     foreach ($name in $locked) { $map[$name] = $true }
     Set-Content -Path $obsolete -Value ($map | ConvertTo-Json -Compress) -Encoding utf8
     Write-Host "  .obsolete 已更新: $($locked -join ', ')"
@@ -87,6 +89,10 @@ if (Test-Path $registry) {
     $json = Get-Content $registry -Raw | ConvertFrom-Json
     $entries = @($json | Where-Object { $_.identifier.id -eq 'qzcode.qzcode' })
     Write-Host "  登记条数: $($entries.Count)（应该是 1）"
+      if ($entries.Count -eq 0) {
+        Write-Host "  ✗ 目录在、但 extensions.json 里没有登记：VS Code 不会加载它。"
+        Write-Host "    修法：code --install-extension <最新 vsix> --force"
+      }
     foreach ($entry in $entries) { Write-Host "    $($entry.identifier.id)@$($entry.version)" }
   } catch {
     Write-Host "  （extensions.json 读不动，跳过）"
