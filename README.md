@@ -1,112 +1,131 @@
-# QZcode
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="QZcode：VS Code 扩展，一句话目标，四个模型接力做成改动，不通过就退回重写，最多 3 轮。">
+</p>
 
-四个模型接力把一句话目标做成可交付的改动（L 负责判断这一轮怎么走，A 写任务书并复核 B 的产出，C 独立核验）：
+<p align="center">
+  <a href="https://github.com/QZzwj/QZcode/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/QZzwj/QZcode?color=67a7ff"></a>
+  <a href="https://github.com/QZzwj/QZcode/blob/main/LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/QZzwj/QZcode?color=56cea1"></a>
+  <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-1.101%2B-67a7ff">
+  <img alt="不需要装 Node" src="https://img.shields.io/badge/Node-%E4%B8%8D%E9%9C%80%E8%A6%81%E8%A3%85-56cea1">
+</p>
 
-```
-L 管全程（决定怎么走、派活）→ A 写任务书 → B 实现 → A 复核 → C 核验 → （不通过退回 A 重写，最多 3 轮）
-```
+你就在 VS Code 的侧栏里写一句"做一个倒计时页面"，然后看着四个模型在里面接力把它做完：一个决定怎么做，一个写任务书，一个动手改文件，最后一个只读核验——**没通过就退回重写，最多 3 轮**。
 
-- **侧栏聊天**是唯一界面（VS Code 右侧栏，跟着你的主题配色）。
-- **后端自带**：扩展里打包好了 `backend/dist/cli.js`，装完就能用，不需要克隆、不需要构建。
-- 用户文档见 [`vscode/README.md`](vscode/README.md)（打包时就是它进 vsix）。
-
----
-
-## 目录
-
-```
-src/                 后端（Node 直接跑 .ts；扩展里跑的是打包好的 dist/cli.js）
-  kernel.ts          插件/工具/命令的装配
-  agent.ts           单个角色的工具循环
-  llm.ts             OpenAI 兼容 SSE 客户端（含截断重试、心跳）
-  roles.ts           L/A/B/C 四个角色的提示词与步骤
-  pipeline.ts        流水线：分流 → 计划 → 实现 → 复核 → 核验
-  tools.ts           read/write/edit/grep/find/ls/bash/browser
-  browser.ts         CDP 驱动的真浏览器（截图、点按）
-  snapshot.ts        改动前快照 / 回滚 / diff
-  git.ts             自动提交（只提交这次改过的路径，必要时 git init）
-  runlog.ts          每轮写 .qzcode/runN.md
-  reference.ts       @文件 引用解析
-  vision.ts          视觉模型（给纯文本的 C 当"第二双眼睛"）
-  cost.ts / steps.ts 记账与按步骤的速度统计
-  doctor.ts          体检（9 项）
-  config.ts          配置归一化与默认值
-  web/server.ts      HTTP + SSE（侧栏直连它）
-  tui/               命令行界面（npm start）
-
-vscode/              扩展
-  extension.cjs      激活、命令、订阅、后端进程管理（含运行时解析）
-  lib.cjs            页面 HTML、运行时/cli 路径解析、csp
-  pages.cjs          两个页面的 HTML 模板（安装包里没有 .html 文件）
-  bundle-backend.mjs 把 src/ 打成 backend/dist/cli.js
-  media/chat.*       侧栏聊天（js/css）
-  media/settings.*   设置面板
-  media/readme/      详情页用的示意图（svg 源 + png）
-  backend/           打进 vsix 的后端
-
-test/                206 条测试（node --test）
-docs/                architecture.md（架构）、plugins.md、skills.md
-plugins/             两个示例插件（不随安装包分发）
-scripts/             打包、清理、UI 验收、发布
-  ui-check-*.mjs     三个真实渲染的 UI 验收（侧栏 / 设置 / 断线恢复）
-  preview-page.mjs   给 UI 验收生成页面
-  probe-installed.mjs  装好之后的冒烟测试（用 VS Code 自带运行时真跑一轮）
-  probe-no-node.mjs    证明 PATH 里没有 node 也能跑
-  probe-features.mjs   端到端验收（计划模式 / 预算闸 / @文件 / 按文件回滚）
-  make-release.mjs / verify-release.mjs  发 GitHub Release 与核对
-  clean-extensions.ps1 / cleanup-repo.mjs  清理
-```
-
-## 开发
-
-```powershell
-npm run typecheck          # tsc --noEmit
-npm test                   # 201 条：node --test
-npm run check              # typecheck + test
-npm run ui:check           # 三个真实渲染的 UI 验收（侧栏 / 设置 / 断线恢复）
-npm run demo               # mock 跑一轮（脚本化模型，不联网）
-npm run start              # 起后端（TUI）
-npm run web                # 起后端（只提供 API + SSE）
-```
-
-UI 验收不是看截图，而是用 CDP 打开真页面量数值：对比度、焦点环、触摸命中区、横向溢出、圆角下限、空状态是否居中、结论是否居中、事件顺序……主模型看不了图，所以这套量化断言是唯一能保证"没画歪"的手段。
+改完的文件就在你的工作区里，diff 能看，能回滚，每轮的完整记录落在 `.qzcode/runN.md`。
 
 ---
 
-## 打包与发布
+## 一眼看明白它在干什么
 
-```powershell
-npm run bundle:backend     # 把 src/ 打成一个 dist/cli.js
-cd vscode
-node ../node_modules/@vscode/vsce/vsce package --allow-missing-repository --no-dependencies --skip-license -o ../qzcode.vsix
-cd ..
-code --install-extension qzcode.vsix --force
+<p align="center">
+  <img src="./assets/readme/vscode-sidebar.png" width="100%" alt="QZcode 侧栏：A 的结论、B 的工具调用与文件改动、居中的通过结论、输入框和两个开关。">
+</p>
+
+真实截图，不是设计稿。从上往下：模型输出（markdown 渲染）、工具调用压成一行（`write OK 96ms index.html`）、文件改动（`+42 −0`，点开看 diff）、结论单独居中、输入框、底下两个开关（先看任务书 / 每次改动自动 git 提交）。
+
+## 为什么不是"又一个 AI 改代码"
+
+大多数工具是**一个模型边说边改**。QZcode 把这件事拆成四个角色，每个角色只干一件事，而且**核验方不能改文件**：
+
+<p align="center">
+  <img src="./assets/readme/roles.svg" width="100%" alt="四角色分工：L 决定这一轮怎么走，A 写任务书并在实现跑偏时退回重做，B 读改文件与跑命令，C 只读核验；C 不通过则退回 A 重写任务书，最多 3 轮。">
+</p>
+
+这么拆带来的实际差别：
+
+- **不会自己宣布成功**。C 只能读文件、跑命令、看截图，没有写权限；它说"通过"之前要给出证据（跑过的命令和输出）。
+- **跑偏能退回去**。B 的实现被 A 复核打回时，是重写任务书而不是硬着头皮往下改，避免越改越偏。
+- **看得见花了多少钱**。设置 → 成本按步骤列出 L/A/B/C 各自的 tok/s、用时、调用次数；今日预算超了直接拒绝启动，不会跑到一半才停。
+- **停止是真停**。按停止是硬中断，正在跑的 shell 命令会被掐掉。
+
+## 装
+
+**方式一 · VS Code 市场（推荐）**
+
+扩展面板搜 `QZcode` → Install → `Ctrl+Shift+P` → `Developer: Reload Window`
+
+**方式二 · 直接装 vsix**
+
+```bash
+code --install-extension qzcode-<版本>.vsix --force
 ```
 
-`vscode/.vscodeignore` 是**白名单**（`*` + `!xxx`）。新增后端文件后一定要确认它在白名单里，否则装完 require 失败、面板打不开——这条有测试守着（`打包清单必须覆盖所有 require`）。
+两条路都不需要：克隆仓库、`npm install`、编译、装 Node。**本地服务跑在 VS Code 自带的运行时上**（实测 VS Code 1.139.1 → Electron 43.6.0 → Node 24.20.0），扩展里带的就是打好的后端。
 
-每版都往 `vsix-history/` 留一份安装包，回退就是装回旧包。
+## 第一次用
 
----
+1. `Ctrl+Shift+P` → `QZcode: 设置（模型 / 技能）`
+2. 四张角色卡片（L / A / B / C）各选一个供应商、填 API key；嫌麻烦就配一张，点「三个都用这套」复制给其它角色
+3. 关掉设置，侧栏输入目标，回车
 
-## 关键设计决定
+**还没想好填哪个 key？** 打开设置里的「用脚本化模型」（`qzcode.mock`），可以完整看一遍四角色接力、工具调用、diff、结论，再切真模型。
 
-| 决定 | 为什么 |
-|---|---|
-| 后端只提供 API + SSE，页面在扩展里 | 减少一份要维护的 GUI；侧栏才是每天用的地方 |
-| 页面 HTML 放在 `pages.cjs` 而不是 `.html` | 安装包里不出现 html 文件；预览/验收脚本直接调 `lib.chatWebviewHtml()`，不会和产品漂移 |
-| 停止 = 硬中断（abort → 杀进程树） | `write` 是同步写，不会写出半个文件；等工具自然结束会让"停止"看起来像没反应 |
-| 预算超了直接拒绝启动 | 跑到一半因预算停更糟 |
-| 自动提交只 `git add <这次改过的路径>` | 不把用户自己未提交的改动卷进提交 |
-| 每步速度只算输出 token、只算模型时间 | 输入 token 不是"生成"的；跑命令的时间不是模型在生成 |
-| 运行记录写 markdown | 人可读、git 可 diff、不需要数据库 |
+想省钱：勾「**先看任务书**」，它只花 A 的钱出任务书，你看完再点「按这个做」——这一轮会跳过 L 和 A。
 
----
+## 它会留下什么
 
-## 收尾检查清单（改完代码照着走）
+```text
+<工作区>/.qzcode/
+  run1.md                这一轮 L / A / B / C 各自干了什么（决策、任务书、工具调用、改动、结论、各步速度）
+  run2.md
+  snapshots/<runId>/     改之前的原件，回滚用
+  shots/                 浏览器验证的截图
+  debug.log              开了 qzcode.log 才有
+```
 
-1. `npm run check` 全绿
-2. `npm run ui:check` 全绿
-3. `npm run bundle:backend` → 打包 → 装 → **Reload Window**
-4. 跑一轮 mock，确认：侧栏出结果、`.qzcode/runN.md` 有内容、有 diff 入口
-5. `Copy-Item qzcode-*.vsix vsix-history\` 并 `git commit`
+- **运行记录**：每轮一份，编号往后排；侧栏结束时有「查看本轮记录」，命令面板也有 `QZcode: 打开运行记录`。
+- **回滚**：整轮还原，或「回滚某个文件」逐个挑；新建的文件回滚时删掉。
+- **git**：开了自动提交就只提交这次改过的路径，不会把你自己未提交的改动卷进去；工作区不是仓库会先 `git init`。
+
+## 命令
+
+| 命令 | 作用 |
+| --- | --- |
+| `QZcode: 打开侧栏聊天` | 聚焦右侧对话视图 |
+| `QZcode: 新建任务…` | 输入目标直接开跑 |
+| `QZcode: 用选中代码当目标…` | 右键选中代码也能用 |
+| `QZcode: 设置（模型 / 技能）` | 模型 / 技能 / 成本三个页签 |
+| `QZcode: 更换 AI 供应商…` | 快速切换（四个角色一起换） |
+| `QZcode: 打开配置（插件在这里开关）` | 打开 `qzcode.json` |
+| `QZcode: 强制停止当前运行` | 同侧栏那个停止键 |
+| `QZcode: 查看本次改动（diff）` | 原生 diff：左快照、右现状 |
+| `QZcode: 回滚本次运行的文件改动` | 确认后整轮还原 |
+| `QZcode: 打开运行记录` | 挑一轮 `.qzcode/runN.md` |
+| `QZcode: 体检（环境自检）` | 9 项：运行时、配置、写权限、shell、技能、插件、安全护栏 |
+| `QZcode: 显示日志` | 本地服务的输出 |
+| `QZcode: 重启服务` / `停止服务` | 改完配置后用 |
+
+## 配置放在哪
+
+| 位置 | 何时用 |
+| --- | --- |
+| `<工作区>/qzcode.json`（或旧名 `pi-trio.json`） | 有就用它 |
+| `%APPDATA%\Code\User\globalStorage\qzcode.qzcode\qzcode.json` | 工作区没有就用全局的，不污染项目 |
+| 都没有 | 自动以 mock 起来，先用；在设置里选供应商会把配置写出来 |
+
+内置 16 家平台的清单（Astron Coding Plan / Baidu Qianfan / BaiLing / BytePlus / DeepSeek / 火山 Agent Plan / Kimi / Longcat / MiniMax / 千问AI平台 / QwenCloud / StepFun / 腾讯云 / Xiaomi MiMo / Zhipu GLM / OpenAI）+ 自定义。选中会带出接口地址和模型，key 还要自己填。
+
+## 已知限制
+
+- 计划模式那一轮不改任何文件，也不做 git 提交（记录文件照写）。
+- 「运行中切文件夹会中断任务」的确认只在切**文件夹**时弹。
+- 断线恢复靠服务内存里的运行对象：服务重启过，那次运行的实时进度就找不回来（已改的文件和 `runN.md` 还在）。
+- 预算硬闸读的是启动时的配置，改完要重启服务。
+- 浏览器验证需要本机有 Chromium（Playwright 缓存 > Chrome > Edge）；都没有时这一步会失败并提示，B 改用命令验证。
+- 视觉模型只在单元测试和本地截图上验证过，没接真实多模态端点实测。
+- 少数平台的兼容地址（Astron / BaiLing / 千问AI平台 / QwenCloud / Xiaomi MiMo）没实测，报 401/404 就按官方文档改「接口地址」。
+
+## 自己改 / 自己打包
+
+```bash
+npm run check          # typecheck + 206 条测试
+npm run ui:check       # 三个真实渲染的 UI 验收（侧栏 / 设置 / 断线恢复）
+npm run demo           # mock 跑一轮，不联网
+npm run bundle:backend # 把 src/ 打成 vscode/backend/dist/cli.js
+```
+
+扩展没有构建步骤，`main` 直接指向 `extension.cjs`。仓库结构、设计决定、发布流程见 [docs/architecture.md](docs/architecture.md)；插件写法见 [docs/plugins.md](docs/plugins.md)，技能见 [docs/skills.md](docs/skills.md)。
+
+## 许可
+
+MIT。插件思路来自 [pi](https://github.com/earendil-works/pi) 的极简 agent harness。

@@ -29,7 +29,9 @@
     "release": "node scripts/make-release.mjs",
     "release:verify": "node scripts/verify-release.mjs",
     "smoke:installed": "node scripts/probe-installed.mjs",
-    "scan:secrets": "node scripts/scan-secrets.mjs"
+    "scan:secrets": "node scripts/scan-secrets.mjs",
+    "svg:check": "node scripts/measure-svg.mjs",
+    "readme:check": "node scripts/measure-svg.mjs && node scripts/audit-readme.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
